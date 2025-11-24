@@ -1,8 +1,10 @@
 from pydub import AudioSegment
 import numpy as np
-import soundfile as sf
 
-# Convert numpy array to AudioSegment
+# ============================================================
+# AudioSegment <-> NumPy conversions
+# ============================================================
+
 def audiosegment_from_numpy(samples: np.ndarray, rate: int) -> AudioSegment:
     samples_int16 = (samples * 32767).astype(np.int16)
     audio = AudioSegment(
@@ -13,61 +15,82 @@ def audiosegment_from_numpy(samples: np.ndarray, rate: int) -> AudioSegment:
     )
     return audio
 
-# Convert AudioSegment to numpy array
 def audiosegment_to_numpy(audio: AudioSegment) -> np.ndarray:
     samples = np.array(audio.get_array_of_samples()).astype(np.float32) / 32767
     if audio.channels > 1:
         samples = samples.reshape((-1, audio.channels))
     return samples
 
-# Reverb effect (slightly more pronounced)
-def add_reverb(audio: AudioSegment, delay_ms=100, repeats=5) -> AudioSegment:
+# ============================================================
+# Reverb
+# ============================================================
+
+def add_reverb(audio: AudioSegment, delay_ms=50, repeats=3):
     output = audio
     for i in range(1, repeats + 1):
         delayed = AudioSegment.silent(duration=delay_ms * i) + (audio - 6)
         output = output.overlay(delayed)
     return output
 
-# Delay effect (echo with feedback)
-def add_delay(audio: AudioSegment, delay_ms=400, repeats=4) -> AudioSegment:
+# ============================================================
+# Delay
+# ============================================================
+
+def add_delay(audio: AudioSegment, delay_ms=200, repeats=2):
     output = audio
     for i in range(1, repeats + 1):
         delayed = AudioSegment.silent(duration=delay_ms * i) + (audio - 8)
         output = output.overlay(delayed)
     return output
 
-# Aggressive bit-crush distortion
-def add_bitcrush(audio: AudioSegment, bit_depth=4, downsample_factor=4) -> AudioSegment:
+# ============================================================
+# Chorus (simple pydub-based modulation)
+# ============================================================
+
+def add_chorus(audio: AudioSegment, depth=0.3, rate=0.5, wet=0.25):
+    modulated = audio + AudioSegment.silent(duration=0)
+    delay_range = int(depth * 10)
+
+    for i in range(delay_range):
+        delayed = AudioSegment.silent(duration=i) + (audio - 10)
+        modulated = modulated.overlay(delayed)
+
+    dry = audio - int(wet * 10)
+    wet_mix = modulated - int((1 - wet) * 10)
+    return dry.overlay(wet_mix)
+
+# ============================================================
+# Bitcrush
+# ============================================================
+
+def add_bitcrush(audio: AudioSegment, bit_depth=8, downsample_factor=2):
     samples = audiosegment_to_numpy(audio)
-    # Reduce bit depth
-    levels = 2 ** bit_depth - 1
-    crushed = np.round(samples * levels) / levels
-    # Downsample to create aliasing artifacts
-    crushed[::downsample_factor] = crushed[::downsample_factor]
+
+    max_val = 2 ** (bit_depth - 1)
+    crushed = np.round(samples * max_val) / max_val
+
+    for i in range(0, len(crushed), downsample_factor):
+        crushed[i:i+downsample_factor] = crushed[i]
+
     crushed = np.clip(crushed, -1.0, 1.0)
     return audiosegment_from_numpy(crushed, audio.frame_rate)
 
-# Save vocals with effect applied fully (wet)
-def save_vocals_only(vocals: np.ndarray, rate: int, effect_func, filename: str):
-    vocal_audio = audiosegment_from_numpy(vocals, rate)
-    vocal_fx = effect_func(vocal_audio)  # full effect applied
-    vocals_fx_np = audiosegment_to_numpy(vocal_fx)
-    sf.write(filename, vocals_fx_np, rate)
+# ============================================================
+# Compression (simple soft knee)
+# ============================================================
 
+def add_compression(audio: AudioSegment, threshold=-25, ratio=3.0):
+    samples = audiosegment_to_numpy(audio)
 
-# Save full mixture with only vocals affected
-def save_full_mix_with_vocals_fx(full_mix: np.ndarray, vocals: np.ndarray, rate: int, effect_func, filename: str):
-    vocal_audio = audiosegment_from_numpy(vocals, rate)
-    vocal_fx = effect_func(vocal_audio)
-    vocals_fx_np = audiosegment_to_numpy(vocal_fx)
-    
-    # Make sure lengths match
-    min_len = min(full_mix.shape[0], vocals_fx_np.shape[0])
-    output = full_mix.copy()
-    # Replace vocals with effected vocals
-    output[:min_len] += vocals_fx_np[:min_len] - vocals[:min_len]
-    output = np.clip(output, -1.0, 1.0)
-    
-    sf.write(filename, output, rate)
+    thr = 10 ** (threshold / 20)
+
+    over = np.abs(samples) > thr
+    samples[over] = np.sign(samples[over]) * (
+        thr + (np.abs(samples[over]) - thr) / ratio
+    )
+
+    samples = np.clip(samples, -1.0, 1.0)
+    return audiosegment_from_numpy(samples, audio.frame_rate)
+
 
 
