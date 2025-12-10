@@ -12,6 +12,8 @@
 8. Analysis and discussion
 9. Bibliography
 
+***
+
 ## 1. Introduction, background and overview of project
 
 Through our project, we aim to answer the following question:
@@ -60,7 +62,7 @@ In conclusion, after being able to draw that BSS struggles with conditions out o
 ## 3. Pipeline:
 We chose the following pipeline:
 
-Experiment 1: Vocal Interference experiment
+#### Experiment 1: Impact of instrumental interference on isolation of vocal tracks when processed using Spleeter and Demucs
 
 1. Obtain MUSDB18 dataset tracks (used the 50 test tracks of the dataset)
 2. Load track
@@ -74,7 +76,7 @@ Experiment 1: Vocal Interference experiment
 10. Evaluate the quality of separation for each and every track of the new and processed dataset with the help of traditional evaluation metrics. (See Section 7 for further details on this.)
 11. Analysis of results, scores, quality and performance for each model.
 
-Experiment 2: Processing experiment
+#### Experiment 2: Impact of common audio effects on good separation of effected vocals from all non-vocal stems 
 
 1. Obtain MUSDB18 dataset tracks (used the 50 test tracks of the dataset)
 2. Load track
@@ -100,7 +102,7 @@ The 150 tracks were sourced from a variety of sources: 100 tracks from dsd100, 4
 
 Once we synthesized the test data of MUSDB18 to serve our purposes, the architecture for each experiment respectively looked as such:
 
-Experiment 1: Vocal Interference experiment
+#### Experiment 1: Impact of instrumental interference on isolation of vocal tracks when processed using Spleeter and Demucs
 
 - musdb18synthesized/
 	- TrackName1/
@@ -121,7 +123,7 @@ Experiment 1: Vocal Interference experiment
 
 And so on for each track.
 
-Experiment 2: Effects experiment
+#### Experiment 2: Impact of common audio effects on good separation of effected vocals from all non-vocal stems 
 
 - musdb18synthesized/
 	- TrackName1/
@@ -354,15 +356,35 @@ ADD CODE SNAPSHOT
 
 ## 8. Analysis and discussion
 
-EXP 1
+#### Experiment 1 scores and evaluation
 
-Using the stems provided in the MUSDB18 dataset, we evaluated the performance of Model 1 and Model 2 with the help of SDR, SIR, SAR, ISR (for Model 1) and SI-SDR, SI-SAR-like, RMSE (for Model 2) metrics. These  stems served as their own control data upon whcih to evaluate performance, allowing us to assess how different non-vocal elements interfere with vocal separation.
+Using the stems provided in the MUSDB18 dataset, we evaluated the performance of Spleeter and Demucs with the help of both SDR, SIR, SAR, ISR and SI-SDR, SI-SAR-like, RMSE metrics. These  stems served as their own control data upon whcih to evaluate performance, allowing us to assess how different non-vocal elements interfere with vocal separation.
 
-Across both models, instruments that overlap heavily in frequency or harmonic content with the vocal stem caused the most interference. Both Model 1 and Model 2 performed well, resulting in high separation scores, on bass and drums. These instrument categories can be noted as not having much hharmonic overlap with the spectrum of a vocal recording. The “other” and "accompaniment" categories, generally guitar and piano recordings respecttively, resulted in the lowest scores, indicating more interference. 
+Across both models, instruments that overlap heavily in frequency or harmonic content with the vocal stem caused the most interference when loooking at separated vocals. Both Spleeter and Demucs performed well, resulting in high separation scores for both metrics, on bass and drums. These instrument categories can be noted as not having much harmonic overlap with the spectrum of a vocal. The “other” and "accompaniment" categories, generally guitar and piano recordings respectively, resulted in the lowest scores accross metrics, indicating more interference. 
 
 The trend demonstrated by both models was that densely textured or harmonically rich stems (e.g. guitar and piano recordings) highly affected vocal separation performance, whereas percussive or tonally distinct instruments (drums, bass) had a smaller impact. However, Model 1 performed better in the ... more sensitive to complex accompaniments, while Model 2 maintained higher fidelity and lower waveform error across most instrument pairings.
 
-EXP 2
+For each instrument, the following scores were found across both metrics:
+
+Accompaniment: 
+- SDR = 12.70, SIR = –2.18, SAR = 0.216, ISR = –5.81
+- SI-SDR = 14.31, SI-SAR-like = 14.47, RMSE = 0.00968
+
+Bass: 
+- SDR = 14.68, SIR = 18.51, SAR = 0.0554, ISR = –19.95
+- SI-SDR = 16.07, SI-SAR-like = 16.18, RMSE = 0.00763
+
+Drums: 
+- SDR = 14.57, SIR = 22.42, SAR = 0.0926, ISR = –16.13
+- SI-SDR = 14.38, SI-SAR-like = 14.53, RMSE = 0.00861
+
+Other: 
+- SDR = 7.11, SIR = 18.13, SAR = 0.0444, ISR = –18.79 
+- SI-SDR = 11.36, SI-SAR-like = 11.67, RMSE = 0.01248
+
+These findings support our claim that both moddels perform well when separating vocals from dums and bass, and both perform poorly in spearting vocals from accompaniment and other.
+
+#### Experiment 2 scores and evaluation
 
 Using the the unprocessed stems provided in the MUSDB18 dataset, we evaluated the performance of Spleeter and Demucs with the help of SI-SDR, SI-SAR-like, RMSE metrics. These unprocessed stems served as control data to compare with and upon which we could evaluate the capabilities of these models.
 
@@ -370,7 +392,7 @@ Across both models, effects that extend or distort time-domain structure (delay,
 
 The trend demonstrated by both models was that reverb highly effected the performance of both models, especially when it was applied to its highest level. The same was found for delay. Comppression caused moderate impact in level 4, resulting in major artifacts, while bitcrushing was the least disruptive. 
 
-For each model, the following  worst scoores were found:
+For each model, the following  worst scores were found:
 #### Spleeter:
 Reverb
 - Vocal SI-SDR (Level 4): –20.5 dB
@@ -411,38 +433,7 @@ From these results, we can see that both models fail badly at high levels of rev
 
 More specifically, Spleeter shows stronger performance when dynamics are distorted, such as in compression, while Demucs performs better when distorttion is applied in bitcrushing. When exaggerated temporal smearing is introduced with reverb and delay, again both models fail. However the type of failure differs: Spleeter tends to better reconstruct waveforms, whereas Demucs produces more artifacts in the waveform.
 
-  
-***
 
-
-
-
-
-
-
-Interpretation of results
-Experiment 1 discussion 
-State how well sources were separated by 1. Spleeter and 2. Demucs, show scores
-Show examples of audio
-Discuss what did poorly and better
-Interpret what this says about each model, for all different instruments
-Benchmark against the vocal on its own’s separation perfo/scores (perfect separation)
-Give an overall rating of the performance = X INSTRUMENT INTERFERES MOST IN OBTAINING A CLEANEST RAW VOCAL WHEN USING SPLEETER, X INSTRUMENT INTERFERES MOST IN OBTAINING A CLEANEST RAW VOCAL WHEN USING DEMUCS
-Pistes de réflexion 
-
-Experiment 2 discussion
-
-Pistes de réflexion, future work
-	Weaknesses of dataset
-As seen in this project…
-	Weaknesses of models
-As seen in this project…
-	Weakness of data transformation
-https://www.researchgate.net/profile/Federico-Fontana-6/publication/331899778_DEVELOPMENT_OF_REAL-TIME_AUDIO_APPLICATIONS_USING_PYTHON/links/5e68baef4585153fb3d60090/DEVELOPMENT-OF-REAL-TIME-AUDIO-APPLICATIONS-USING-PYTHON.pdf
-	Summary of areas for improvement/future work
-Limited variety of styles
-Metrics for evaluation suck
-Only tradition instrumentation
 
 ## 9. Bibliography
 
