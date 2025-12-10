@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Output root
-OUTPUT_ROOT="../separated_outputs_experiment2"
+OUTPUT_ROOT="sample/output/path"
 
 mkdir -p "$OUTPUT_ROOT"
 
