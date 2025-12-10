@@ -367,4 +367,22 @@ Limited variety of styles
 Metrics for evaluation suck
 Only tradition instrumentation
 
-9. Bibliography:
+## 9. Bibliography
+
+Bereuter, F., Stahl, J., Plumbley, M., & Sontacchi, J. (2025). Musical source separation bake-off: Comparing objective metrics with human perception. [Manuscript in preparation].
+
+De Pra, Y., & Fontana, F. (2018). Development of real‑time audio applications using Python. IRIS — University of Udine. https://hdl.handle.net/11390/1147041
+
+Defossez, A., Usunier, N., Bottou, L., & Jégou, H. (2019). Two-step sound source separation: Training on learned latent targets. arXiv. https://arxiv.org/abs/1910.09804
+
+Le Roux, J., Wisdom, S., Hennequin, R., & Vincent, E. (2019). SDR — Half-baked or well done? Google Research. https://research.google/pubs/sdr-half-baked-or-well-done/
+
+McFee, B., Raffel, C., Liang, D., Ellis, D. P. W., McVicar, M., Battenberg, E., & Nieto, O. (2015). librosa: Audio and music signal analysis in Python. In B. V. Das & S. R. (Eds.), Proceedings of the 14th Python in Science Conference (pp. 18–25). https://librosa.org
+
+Namballa, R., Roginska, A., & Fuentes, J. (2025). Do music source separation models preserve spatial information in binaural audio? [Conference paper]. https://www.researchgate.net/publication/393260674_Do_Music_Source_Separation_Models_Preserve_Spatial_Information_in_Binaural_Audio
+
+Rafii, Z., Liutkus, A., Stöter, F.-R., Mimilakis, S., Bittner, R., & others. (2017). musdb18: A corpus for music separation. https://sigsep.github.io/musdb/
+
+Stoller, D., Ewert, S., & Dixon, S. (2018). Wave-U-Net: A multi-scale neural network for end-to-end audio source separation. In Proceedings of the International Society for Music Information Retrieval Conference (ISMIR).
+
+Vincent, E., Gribonval, R., & Févotte, C. (2006). Performance measurement in blind audio source separation. IEEE Transactions on Audio, Speech, and Language Processing, 14(4), 1462–1469. https://doi.org/10.1109/TSA.2005.858005
