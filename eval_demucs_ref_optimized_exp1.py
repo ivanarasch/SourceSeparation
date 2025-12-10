@@ -8,13 +8,13 @@ import argparse
 import warnings
 import concurrent.futures
 from tqdm import tqdm
+import re
 
 # --- CONFIGURATION ---
-# SAFE MODE: Set to 2.
-# If you have 32GB+ RAM, you can try 4 or 6.
-MAX_WORKERS = 2 
+# 4 workers is safe for M3 Pro (18GB RAM)
+MAX_WORKERS = 4
 
-# Suppress warnings for cleaner output
+# Suppress warnings
 warnings.filterwarnings("ignore")
 
 def load_audio(path):
@@ -26,182 +26,207 @@ def load_audio(path):
         raise FileNotFoundError(f"File not found: {path}")
 
     try:
-        # Use soundfile just to check if the file is readable
+        # Check readability
         with sf.SoundFile(path) as f:
             pass
     except Exception as e:
         raise RuntimeError(f"File unreadable: {path}\nError: {e}")
 
-    # Load with librosa (sr=None ensures no resampling)
+    # Load with librosa
     audio, sr = librosa.load(path, sr=None, mono=False)
     
-    # Handle shape (Channels, Samples) -> (Samples, Channels)
+    # Handle shape
     if audio.ndim == 1:
         audio = audio[np.newaxis, :]
     
-    # Transpose to (Samples, Channels)
     audio = audio.T
     return audio
 
-def evaluate_pair(reference_files, estimate_files):
+def group_demucs_folders(ref_root):
     """
-    Calculates BSSEval metrics for a pair of sources.
+    Scans a Demucs 'Flat' directory and groups folders by Song Name.
+    Returns: dict { "SongName": { "bass": "Path/To/Song_bass", "drums": ... } }
     """
-    # 1. Load Audio
-    refs = [load_audio(p) for p in reference_files]
-    ests = [load_audio(p) for p in estimate_files]
+    songs = {}
+    
+    # Regex to capture "Song Name" and "stem" from "Song Name_stem"
+    # Matches: "Artist - Title_bass" -> Group 1: "Artist - Title", Group 2: "bass"
+    pattern = re.compile(r"(.*)_(bass|drums|other|vocals)$")
 
-    # 2. Align Lengths (Crop to shortest)
-    min_len = min([x.shape[0] for x in refs + ests])
-    refs = [x[:min_len, :] for x in refs]
-    ests = [x[:min_len, :] for x in ests]
+    for folder in os.listdir(ref_root):
+        full_path = os.path.join(ref_root, folder)
+        if not os.path.isdir(full_path):
+            continue
 
-    # 3. Stack for Museval (n_sources, n_samples, n_channels)
-    references = np.stack(refs)
-    estimates = np.stack(ests)
+        match = pattern.match(folder)
+        if match:
+            song_name = match.group(1)
+            stem_name = match.group(2)
+            
+            if song_name not in songs:
+                songs[song_name] = {}
+            
+            songs[song_name][stem_name] = full_path
 
-    # 4. Compute Metrics (Global SDR for speed/stability)
-    # Using win=float('inf') is safer for multiprocessing memory usage than win=1.0
-    scores = museval.evaluate(references, estimates, win=1.0)
-    return scores
+    return songs
 
-def find_model_files(model_root, song_name, stem_name):
+def find_spleeter_files(model_root, song_name, stem_name):
     """
-    Tries to find the model's output files by checking both Nested and Flat structures.
+    Finds Spleeter 'Nested' files: Model/Song/stem_vocals/[vocals.wav, accompaniment.wav]
     """
-    # Strategy 1: Nested Structure (Spleeter-style)
+    # Spleeter folder naming convention: "stem_vocals"
     nested_dir = os.path.join(model_root, song_name, f"{stem_name}_vocals")
+    
     if os.path.exists(nested_dir):
         v_path = os.path.join(nested_dir, "vocals.wav")
         acc_path = os.path.join(nested_dir, "accompaniment.wav")
+        
+        # Fallback for filenames
         if not os.path.exists(acc_path):
             acc_path = os.path.join(nested_dir, "no_vocals.wav")
             
         if os.path.exists(v_path) and os.path.exists(acc_path):
-            return [v_path, acc_path], "Nested"
-
-    # Strategy 2: Flat Structure (Demucs-style)
-    flat_dir_name = f"{song_name}_{stem_name}"
-    flat_dir = os.path.join(model_root, flat_dir_name)
-    if os.path.exists(flat_dir):
-        v_path = os.path.join(flat_dir, "vocals.wav")
-        acc_path = os.path.join(flat_dir, "no_vocals.wav")
-        if not os.path.exists(acc_path):
-            acc_path = os.path.join(flat_dir, "accompaniment.wav")
-
-        if os.path.exists(v_path) and os.path.exists(acc_path):
-            return [v_path, acc_path], "Flat"
-
-    return None, None
-
-def process_single_song(args):
-    """
-    Worker function.
-    Args must be packed into a tuple because ProcessPoolExecutor maps 1 argument.
-    args: (model_name, model_root, ref_root, song_folder)
-    """
-    model_name, model_root, ref_root, song_folder = args
-    results = []
+            return [v_path, acc_path]
     
+    return None
+
+def process_single_song_demucs_ref(args):
+    """
+    Worker Function:
+    1. Receives a Demucs Song Map (containing paths to bass, drums, etc.)
+    2. Loads Demucs Audio ONCE.
+    3. Compares against all Models (Spleeter).
+    """
+    song_name, stems_map, model_infos = args
+    results = []
+
     try:
-        ref_song_path = os.path.join(ref_root, song_folder)
-        if not os.path.exists(ref_song_path):
-            return []
-
-        # Find subfolders (tasks) in the Reference directory
-        subfolders = [d for d in os.listdir(ref_song_path) 
-                      if os.path.isdir(os.path.join(ref_song_path, d))]
-
-        for sub in subfolders:
-            if not sub.endswith("_vocals"):
-                continue
-                
-            stem_name = sub.replace("_vocals", "")
+        # Iterate through the stems found for this song (bass, drums, etc.)
+        for stem_name, ref_dir_path in stems_map.items():
             
-            # 1. Get Reference Files
-            ref_dir = os.path.join(ref_song_path, sub)
+            # --- 1. Identify Reference (Demucs) Files ---
+            # Demucs Flat folders usually contain 'vocals.wav' and 'no_vocals.wav'
+            # (Note: In a 'bass' folder, 'vocals.wav' is the separated bass, 'no_vocals' is the rest)
+            
             ref_files = [
-                os.path.join(ref_dir, "vocals.wav"),
-                os.path.join(ref_dir, "accompaniment.wav")
+                os.path.join(ref_dir_path, "vocals.wav"),
+                os.path.join(ref_dir_path, "no_vocals.wav")
             ]
             
-            # Fallback check for ref filenames
+            # Fallback if named accompaniment
+            if not os.path.exists(ref_files[1]):
+                ref_files[1] = os.path.join(ref_dir_path, "accompaniment.wav")
+                
             if not all(os.path.exists(f) for f in ref_files):
-                ref_files[1] = os.path.join(ref_dir, "no_vocals.wav")
-                if not all(os.path.exists(f) for f in ref_files):
-                    continue
-
-            # 2. Find Model Files
-            est_files, struct_type = find_model_files(model_root, song_folder, stem_name)
-            
-            if not est_files:
                 continue
 
-            # 3. Evaluate
-            sdr, isr, sir, sar = evaluate_pair(ref_files, est_files)
-            
-            source_labels = ["vocals", stem_name]
-            
-            for i, label in enumerate(source_labels):
-                results.append({
-                    "Model": model_name,
-                    "Song": song_folder,
-                    "Combination": sub,
-                    "Source": label,
-                    "SDR": np.nanmedian(sdr[i]),
-                    "SIR": np.nanmedian(sir[i]),
-                    "SAR": np.nanmedian(sar[i]),
-                    "ISR": np.nanmedian(isr[i])
-                })
+            # --- 2. Load Reference Audio (CACHE IT) ---
+            # Optimization: Load Demucs once, compare to all models
+            try:
+                loaded_refs = [load_audio(p) for p in ref_files]
+            except Exception:
+                continue
+
+            # --- 3. Compare against Spleeter (and other models) ---
+            for model_name, model_root in model_infos:
                 
-    except Exception as e:
-        # Return empty list on error to keep processing other songs
-        # print(f"Error processing {song_folder}: {e}") 
+                # A. Find Model Files (Spleeter Nested Structure)
+                est_files = find_spleeter_files(model_root, song_name, stem_name)
+                
+                if not est_files:
+                    # print(f"Missing {stem_name} for {song_name} in {model_name}")
+                    continue
+
+                # B. Load Model Audio
+                try:
+                    loaded_ests = [load_audio(p) for p in est_files]
+                except Exception:
+                    continue
+
+                # C. Align Lengths
+                min_len = min([x.shape[0] for x in loaded_refs + loaded_ests])
+                
+                curr_refs = [x[:min_len, :] for x in loaded_refs]
+                curr_ests = [x[:min_len, :] for x in loaded_ests]
+
+                references = np.stack(curr_refs)
+                estimates = np.stack(curr_ests)
+
+                # D. Evaluate (Fast Mode win=1.0)
+                sdr, isr, sir, sar = museval.evaluate(references, estimates, win=1.0)
+
+                # E. Store Results
+                # Label 0 is usually the Stem (Bass), Label 1 is Accompaniment
+                source_labels = [stem_name, "accompaniment"]
+                
+                for i, label in enumerate(source_labels):
+                    results.append({
+                        "Model": model_name,
+                        "Song": song_name,
+                        "Combination": f"{stem_name}_vocals", # Maintaining naming convention
+                        "Source": label,
+                        "SDR": np.nanmedian(sdr[i]),
+                        "SIR": np.nanmedian(sir[i]),
+                        "SAR": np.nanmedian(sar[i]),
+                        "ISR": np.nanmedian(isr[i])
+                    })
+
+    except Exception:
         pass
 
     return results
 
 def main():
-    parser = argparse.ArgumentParser(description="Multicore Universal Source Separation Evaluation.")
-    parser.add_argument("--ref", required=True, help="Path to Reference (Ground Truth) Root")
-    parser.add_argument("--models", nargs='+', required=True, help="List of Model Root Directories")
-    parser.add_argument("--output", default="comparison_results.xlsx", help="Output Excel filename")
+    parser = argparse.ArgumentParser(description="Demucs-Ref Optimized Comparison.")
+    parser.add_argument("--ref", required=True, help="Path to Demucs (Flat) Root Directory")
+    parser.add_argument("--models", nargs='+', required=True, help="Path to Spleeter (Nested) Root Directories")
+    parser.add_argument("--output", default="demucs_ref_results.xlsx", help="Output Excel filename")
 
     args = parser.parse_args()
 
     all_results = []
-    print(f"Reference Path: {args.ref}")
-    print(f"Worker Threads: {MAX_WORKERS}")
+    print(f"Reference Path (Demucs): {args.ref}")
+    print(f"Workers: {MAX_WORKERS}")
 
-    # Gather list of songs from Reference
-    ref_songs = [d for d in os.listdir(args.ref) if os.path.isdir(os.path.join(args.ref, d)) and not d.startswith(".")]
+    # 1. Group Demucs folders by Song
+    print("Scanning Demucs Reference folder...")
+    songs_map = group_demucs_folders(args.ref)
     
-    for model_path in args.models:
-        model_name = os.path.basename(os.path.normpath(model_path))
-        print(f"\n--- Processing Model: {model_name} ---")
+    if not songs_map:
+        print("Error: No 'SongName_stem' folders found in Reference. Is it a flat Demucs folder?")
+        return
+
+    print(f"Found {len(songs_map)} unique songs.")
+
+    # 2. Prepare Model Info
+    model_infos = []
+    for m_path in args.models:
+        m_name = os.path.basename(os.path.normpath(m_path))
+        model_infos.append((m_name, m_path))
+
+    # 3. Create Tasks
+    # Task: (SongName, DictOfStems, ListOfModels)
+    tasks = [(song, stems, model_infos) for song, stems in songs_map.items()]
+
+    # 4. Execute
+    print("Starting processing...")
+    with concurrent.futures.ProcessPoolExecutor(max_workers=MAX_WORKERS) as executor:
+        results_generator = list(tqdm(executor.map(process_single_song_demucs_ref, tasks), total=len(tasks)))
         
-        if not os.path.exists(model_path):
-            print(f"Error: Path not found {model_path}")
-            continue
+        for res in results_generator:
+            if res:
+                all_results.extend(res)
 
-        # Prepare tasks for Multiprocessing
-        # We create a list of argument tuples: [(model, path, ref, song1), (model, path, ref, song2), ...]
-        tasks = [(model_name, model_path, args.ref, song) for song in ref_songs]
-
-        # Execute in Parallel
-        with concurrent.futures.ProcessPoolExecutor(max_workers=MAX_WORKERS) as executor:
-            # map returns results in order
-            results_generator = list(tqdm(executor.map(process_single_song, tasks), total=len(tasks)))
-            
-            # Flatten the list of lists
-            for res in results_generator:
-                if res:
-                    all_results.extend(res)
-
+    # 5. Save
     if all_results:
         df = pd.DataFrame(all_results)
         df.to_excel(args.output, index=False)
         print(f"\nSuccess! Saved to {args.output}")
+        try:
+            print("\nMedian SDR Summary:")
+            print(df.groupby(["Model", "Source"])["SDR"].median())
+        except:
+            pass
     else:
         print("\nNo results generated. Check paths.")
 
