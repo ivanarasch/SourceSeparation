@@ -17,7 +17,7 @@ import math
 import multiprocessing
 
 # --- Configuration (edit as needed) ---
-ROOT_DIR = "/Users/ivanarasch/Desktop/GradSchool/MIR/SourceSeparationProject/OUTPUT_DEMUCS_EXP2"
+ROOT_DIR = "/Sample/Data/Path"
 OUTPUT_FILE = "evaluation_results_si_metrics.xlsx"
 ORIGINAL_SUFFIX = "_original"  # still used if you have exact matches
 # --------------------------
