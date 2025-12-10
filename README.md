@@ -338,6 +338,60 @@ ADD CODE SNAPSHOT
 
 ## 8. Analysis and discussion
 
+EXP 2
+Using the the unprocessed stems provided in the MUSDB18 dataset, we evaluated the performance of Spleeter and Demucs with the help of SI-SDR, SI-SAR-like, RMSE metrics. These unprocessed stems served as control data to compare with and upon which we could evaluate the capabilities of these models.
+
+Across both models, effects that extend or distort time-domain structure (delay, reverb) caused the most damage. Effects that modify spectral resolution (bitcrush) or dynamic range (compression) were less harmful unless pushed to extremes.
+The trend demonstrated by both models was that reverb highly effected the performance of both models, especially when it was applied to its highest level. The same was found for delay. Comppression caused moderate impact in level 4, resulting in major artifacts, while bitcrushing was the least disruptive. 
+
+For each model, the following  worst scoores were found:
+#### Spleeter:
+Reverb
+- Vocal SI-SDR (Level 4): –20.5 dB
+- Other SI-SDR (Level 4, average): 1.9 dB
+- RMSE (vocal, Level 4): 0.052
+  
+Delay
+- Vocal SI-SDR (Level 4): 2.7 dB
+- RMSE (vocal, Level 4): 0.041
+  
+Compression
+- Vocal SI-SDR (Level 4): 4.0 dB
+- RMSE (vocal, Level 4): 0.033
+  
+Bitcrushing
+- Vocal SI-SDR (all levels): 7.6 dB
+- RMSE (vocal, all levels): 0.028
+
+#### Demucs:
+Reverb
+- Vocal SI-SDR (Level 4): –19.99 dB
+- Other SI-SDR (Level 4, average): 1.53–4.08 dB
+- RMSE (vocal, Level 4): 0.1226
+  
+Delay
+- Vocal SI-SDR (Level 4): 2.51 dB
+- RMSE (vocal, Level 4): 0.0346
+  
+Compression
+- Vocal SI-SDR (Level 4): 1.19 dB
+- RMSE (vocal, Level 4): 0.0348
+  
+Bitcrushing
+- Vocal SI-SDR (all levels): 8.7–9.1 dB
+- RMSE (vocal, all levels): 0.0128–0.0136
+
+From these results, we can see that both models fail badly at high levels of reverb, with Spleeter having slightly lower RMSE. The same is seen for delay, however in this instance Demucs presents the lower RMSE. In compressing, Spleeter outperforms Demucs overall, and in bitcrushing Demucs outperforms Spleeter. Thus, it is difficult to state which model performed better overall. What can be reiterated is that both models, at high levels of processing, source seperation is poorly accomplished.
+
+  
+***
+
+
+
+
+
+
+
 Interpretation of results
 Experiment 1 discussion 
 State how well sources were separated by 1. Spleeter and 2. Demucs, show scores
