@@ -340,12 +340,18 @@ ADD CODE SNAPSHOT
 
 EXP 1
 
+Using the stems provided in the MUSDB18 dataset, we evaluated the performance of Model 1 and Model 2 with the help of SDR, SIR, SAR, ISR (for Model 1) and SI-SDR, SI-SAR-like, RMSE (for Model 2) metrics. These  stems served as their own control data upon whcih to evaluate performance, allowing us to assess how different non-vocal elements interfere with vocal separation.
 
+Across both models, instruments that overlap heavily in frequency or harmonic content with the vocal stem caused the most interference. Both Model 1 and Model 2 performed well, resulting in high separation scores, on bass and drums. These instrument categories can be noted as not having much hharmonic overlap with the spectrum of a vocal recording. The “other” and "accompaniment" categories, generally guitar and piano recordings respecttively, resulted in the lowest scores, indicating more interference. 
+
+The trend demonstrated by both models was that densely textured or harmonically rich stems (e.g. guitar and piano recordings) highly affected vocal separation performance, whereas percussive or tonally distinct instruments (drums, bass) had a smaller impact. However, Model 1 performed better in the ... more sensitive to complex accompaniments, while Model 2 maintained higher fidelity and lower waveform error across most instrument pairings.
 
 EXP 2
+
 Using the the unprocessed stems provided in the MUSDB18 dataset, we evaluated the performance of Spleeter and Demucs with the help of SI-SDR, SI-SAR-like, RMSE metrics. These unprocessed stems served as control data to compare with and upon which we could evaluate the capabilities of these models.
 
 Across both models, effects that extend or distort time-domain structure (delay, reverb) caused the most damage. Effects that modify spectral resolution (bitcrush) or dynamic range (compression) were less harmful unless pushed to extremes.
+
 The trend demonstrated by both models was that reverb highly effected the performance of both models, especially when it was applied to its highest level. The same was found for delay. Comppression caused moderate impact in level 4, resulting in major artifacts, while bitcrushing was the least disruptive. 
 
 For each model, the following  worst scoores were found:
