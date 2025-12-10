@@ -108,36 +108,40 @@ Once we synthesized the test data of MUSDB18 to serve our purposes, the architec
 
 #### Experiment 1: Impact of instrumental interference on isolation of vocal tracks when processed using Spleeter and Demucs
 
-- musdb18synthesized/
+- musdb18SynthesizedExperiment1/
 	- TrackName1/
 		- accompainment_vocals.wav
         - bass_vocals.wav
         - drums_vocals.wav
         - other_vocals.wav
 
-And so on for each track.
+And so on for each track. Total of 200 songs
 
 #### Experiment 2: Impact of common audio effects on good separation of effected vocals from all non-vocal stems 
 
-musdb18synthesized/
-  TrackName1/
-    TrackName1_original.wav
-    TrackName1_delay_l1.wav
-    TrackName1_delay_l2.wav
-    TrackName1_delay_l4.wav
-    TrackName1_bitcrush_l1.wav
-    TrackName1_bitcrush_l2.wav
-    TrackName1_bitcrush_l4.wav
-    TrackName1_compression_l1.wav
-    TrackName1_compression_l2.wav
-    TrackName1_compression_l4.wav
-    TrackName1_reverb_l1.wav
-    TrackName1_reverb_l2.wav
-    TrackName1_reverb_l4.wav
+- musdb18SynthesizedExperiment2/
+	- TrackName1/
+		- accompainment_vocals.wav
+        - bass_vocals.wav
+        - drums_vocals.wav
+        - other_vocals.wav
+        - TrackName1_original.wav
+        - TrackName1_delay_l1.wav
+        - TrackName1_delay_l2.wav
+        - TrackName1_delay_l4.wav
+        - TrackName1_bitcrush_l1.wav
+        - TrackName1_bitcrush_l2.wav
+        - TrackName1_bitcrush_l4.wav
+        -  TrackName1_compression_l1.wav
+        -  TrackName1_compression_l2.wav
+        -  TrackName1_compression_l4.wav
+        -  TrackName1_reverb_l1.wav
+        -  TrackName1_reverb_l2.wav
+        -  TrackName1_reverb_l4.wav
 	    
     
 	
-And so on for each track.
+And so on for each track. Total of 650 songs
 
 ## 5. Models
 
