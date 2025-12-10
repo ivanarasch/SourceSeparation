@@ -1,15 +1,15 @@
 
 Table of contents
 
-Introduction, background
-Lit review
-Pipeline
-Dataset and architecture
-Models and methods
-Experiments, preprocessing
-Presentation of evaluation metrics
-Analysis and discussion
-Bibliography
+1. Introduction, background
+2. Lit review
+3. Pipeline
+4. Dataset and architecture
+5. Models and methods
+6. Experiments, preprocessing
+7. Presentation of evaluation metrics
+8. Analysis and discussion
+9. Bibliography
 
 Intro, background and overview of project:
 
