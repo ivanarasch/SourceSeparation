@@ -347,7 +347,7 @@ Using the stems provided in the MUSDB18 dataset, we evaluated the performance of
 
 Across both models, instruments that overlap heavily in frequency or harmonic content with the vocal stem caused the most interference when loooking at separated vocals. Both Spleeter and Demucs performed well, resulting in high separation scores for both metrics, on bass and drums. These instrument categories can be noted as not having much harmonic overlap with the spectrum of a vocal. The “other” and "accompaniment" categories, generally guitar and piano recordings respectively, resulted in the lowest scores accross metrics, indicating more interference. 
 
-The trend demonstrated by both models was that densely textured or harmonically rich stems (e.g. guitar and piano recordings) highly affected vocal separation performance, whereas percussive or tonally distinct instruments (drums, bass) had a smaller impact. However, Model 1 performed better in the ... more sensitive to complex accompaniments, while Model 2 maintained higher fidelity and lower waveform error across most instrument pairings.
+The trend demonstrated by both models was that densely textured or harmonically rich stems (e.g. guitar and piano recordings) highly affected vocal separation performance, whereas percussive or tonally distinct instruments (drums, bass) had a smaller impact. However, #### Model 1 performed better on more complex accompaniments, while Model 2 maintained higher fidelity and lower waveform error across most instrument pairings.
 
 For each instrument, the following scores were found across both metrics:
 
@@ -433,6 +433,8 @@ Bereuter, F., Stahl, J., Plumbley, M., & Sontacchi, J. (2025). Musical source se
 De Pra, Y., & Fontana, F. (2018). Development of real‑time audio applications using Python. IRIS — University of Udine. https://hdl.handle.net/11390/1147041
 
 Defossez, A., Usunier, N., Bottou, L., & Jégou, H. (2019). Two-step sound source separation: Training on learned latent targets. arXiv. https://arxiv.org/abs/1910.09804
+
+Hennequin, R., Khlif, A., Voituret, F., & Moussallam, M. (2020). Spleeter: a fast and efficient music source separation tool with pre-trained models. Journal of Open Source Software, 5(50), 2154.
 
 Le Roux, J., Wisdom, S., Hennequin, R., & Vincent, E. (2019). SDR — Half-baked or well done? Google Research. https://research.google/pubs/sdr-half-baked-or-well-done/
 
