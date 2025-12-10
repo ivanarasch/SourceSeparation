@@ -121,10 +121,6 @@ And so on for each track. Total of 200 songs
 
 - musdb18SynthesizedExperiment2/
 	- TrackName1/
-		- accompainment_vocals.wav
-        - bass_vocals.wav
-        - drums_vocals.wav
-        - other_vocals.wav
         - TrackName1_original.wav
         - TrackName1_delay_l1.wav
         - TrackName1_delay_l2.wav
