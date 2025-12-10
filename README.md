@@ -10,7 +10,8 @@
 6. Experiments, preprocessing
 7. Presentation of evaluation metrics
 8. Analysis and discussion
-9. Bibliography
+9. Conclusion
+10. Bibliography
 
 ***
 
@@ -56,11 +57,14 @@ In one article, Namballa, Roginska, and Fuentes (2025) show that existing separa
 Another common downfall of BSS is the handling of phase. Stoller, Ewert, and Dixon (2018) highlight that magnitude-only spectrogram-based source separation methods often ignore phase information, which effectively limits performance and can lead to outputs which are perceptually inadequate for human listeners. In their work, the authors discuss possible avenues to address these issues, such as the Wave-U-Net technique, which is used by Demucs. Wave-U-Net implements a neural network architecture so as to separate sources from a full mix with the time-domain representation directly. It employs encoder and decoder layers of varying lengths (downsampling and upsampling), recognizing timbral and rhythmic patterns within the song so as to separate sources from the mix. In such, Wave-U-Net avoids STFT-based phase reconstruction, resulting in a reduction phase-related limitations. However, it still generally relies on intrusive metrics like SDR, which require isolated stems for evaluation. 
 
 This naturally raises the question of the quality and practicality of evaluation metrics. Undoubtedly, the current methods most commonly used for BSS evaluation leave much to be desired. In one paper by Bereuter, Stahl, Plumbley, and Sontacchi (2025) the authors examine these limitations and propose moving towards evaluation implementations and metrics that are increasingly perceptually grounded and better reflect human listening. The principal contribution of their work suggests a redefinition of evaluation, specifically for singing voice separation, proposing learned embedding spaces instead of the standard waveform-level comparisons. These proved to correlate more strongly with human judgements.
+
 The paper outlines several models that exemplify this new perceptual, reference-free evaluation paradigm, such as XLS-R-SQA, Audiobox Aesthetics, PAM and SingMOS. These methods offer a reference-free evaluation which is advantageous for generatively separated sources, as opposed to the traditional metrics which rely on ground truth stems. This reliance can often lead to penalization of perceptually adequate outputs that diverge from the reference waveform. Contrarily, embedding based metrics such as ViSQOL, multi-resolution STFT, MERT, and Music2LatentTraditional align more accurately with human evaluation. These models also attack the problem of reliance on pre-split tracks, allowing for source separation of potentially any song.
+
 In conclusion, after being able to draw that BSS struggles with conditions out of the ordinary, and paired with our research question, we designed the two previously mentioned experiments to judge the performance of the models chosen. The first experiment serves the purpose of determining what non-vocal elements cause the most interference and result in poor outputs. The second tests how the models can perform on processed, or unusual inputs. These both serve the purpose of filling gaps in the literature reviewed, as many discuss more technical things but don’t tackle more commonplace, production and engineering focused problems. 
 
-## 3. Pipeline:
-We chose the following pipeline:
+## 3. Pipeline
+
+We chose the following pipeline for our project for each experiment:
 
 #### Experiment 1: Impact of instrumental interference on isolation of vocal tracks when processed using Spleeter and Demucs
 
@@ -90,7 +94,7 @@ We chose the following pipeline:
 10. Evaluate the quality of separation for each and every track of the new and processed dataset with the help of traditional evaluation metrics. (See Section 7 for further details on this.)
 11. Analysis of results, scores, quality and performance for each model.
 
-## 4. Dataset and architecture:
+## 4. Dataset and architecture
 
 We made use of the MUSDB18 dataset as the dataset for our source separation project. We made use of the separated stems as well as the full mixes of the tracks to impose difficult conditions onto the tracks for the purposes of our research into how the Spleeter and Demucs models handle challenging conditions, according to our pipeline and experiment structure.
 
@@ -431,11 +435,17 @@ Bitcrushing
 
 From these results, we can see that both models fail badly at high levels of reverb, with Spleeter having slightly lower RMSE. The same is seen for delay, however in this instance Demucs presents the lower RMSE. In compressing, Spleeter outperforms Demucs overall, and in bitcrushing Demucs outperforms Spleeter. Thus, it is difficult to state which model performed better overall. What can be reiterated is that both models, at high levels of processing, source seperation is poorly accomplished.
 
-More specifically, Spleeter shows stronger performance when dynamics are distorted, such as in compression, while Demucs performs better when distorttion is applied in bitcrushing. When exaggerated temporal smearing is introduced with reverb and delay, again both models fail. However the type of failure differs: Spleeter tends to better reconstruct waveforms, whereas Demucs produces more artifacts in the waveform.
+More specifically, Spleeter shows stronger performance when dynamics are distorted, such as in compression, while Demucs performs better when distorttion is applied in bitcrushing. When exaggerated temporal smearing is introduced with reverb and delay, again both models fail. However their failures differ: Spleeter shows better reconstruction of waveforms, whereas Demucs produces more artifacts in the reconstructed waveform.
 
+## 9. Conclusion
 
+In conclusion, the first experiment determined that non-vocal elements with similar harmonic content to vocals cause the most interference and cause the models to perform poorly, while harrmonically disparate elements such as drums and bass allow for better vocal separation performaance of models. The second experiment demonstrated that both models struggle with separation of highly processed vocal inputs, most specifically after applying effects which impact the harmonic structure and temporal cues such as reverb and delay, while effects such as compression and bitcrushing which distort dynamics result in better separated outputs. One challenge to retain from the second experiment is that the model struggled in keeping the effects only tied to the vocal stems, occasionally erroniously separating the effects with non-vocal elements. This is an audible observation that leaves us with the opportunity to further explore how these models can better distinguish assign applied effects to the correct sources, ensuring that reverberation, delay, or other processing remains confined to the intended stem without leaking into other separated tracks.
 
-## 9. Bibliography
+Future work could explore training or fine-tuning the models on datasets that include stems with commonly applied effects, allowing them to learn to separate both source content and processing more accurately. Next, expanding the dataset to include a wider variety of instruments and more complex arrangements could allow for further evaluation of models' handling harmonically dense or overlapping sources. Additionally, incorporating multi-channel or spatial cues, as well as more advanced waveform modeling techniques, may further improve separation quality, particularly in complex mixtures with overlapping harmonic and temporal content.
+
+Finally, from our above findings, it is impossible to draw a definitive conclusion on which model performs better overall under challenging conditions, confronting the idea that Demucs is a superior model. 
+
+## 10. Bibliography
 
 Bereuter, F., Stahl, J., Plumbley, M., & Sontacchi, J. (2025). Musical source separation bake-off: Comparing objective metrics with human perception. [Manuscript in preparation].
 
