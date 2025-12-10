@@ -1,8 +1,8 @@
 import os
 import subprocess
 
-data_root = "/Users/ivanarasch/Desktop/GradSchool/MIR/SourceSeparationProject/demucs-main/experiment2data"
-output_root = "/Users/ivanarasch/Desktop/GradSchool/MIR/SourceSeparationProject/demucs-main"
+data_root = "/Sample/Data/Path"
+output_root = "/Sample/Output/Path"
 
 os.makedirs(output_root, exist_ok=True)
 
