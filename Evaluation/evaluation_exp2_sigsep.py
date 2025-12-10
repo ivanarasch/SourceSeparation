@@ -148,7 +148,7 @@ def process_single_song_folder(song_folder_path, original_suffix):
 
 def main():
     # --- Arguments ---
-    root_dir = "/Volumes/Ivana/ML Outputs/spleeter_experiment2"
+    root_dir = "/Sample/Data/Path"
     original_suffix = "_original"
     output_file = "results_fast.xlsx"
 
