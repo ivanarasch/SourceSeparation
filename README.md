@@ -122,18 +122,7 @@ And so on for each track.
 - musdb18synthesized/
 	-TrackName1/
 	    - TrackName1_original.wav
-	    - TrackName1_delay_l1.wav
-		- TrackName1_delay_l2.wav
-	    - TrackName1_delay_l4.wav
-	    - TrackName1_bitcrush_l1.wav
-		- TrackName1_bitcrush_l2.wav		
-		- TrackName1_bitcrush_l4.wav		
-		- TrackName1_compression_l1.wav	
-		- TrackName1_compression_l2.wav	
-		- TrackName1r_compression_l4.wav	
-	    - TrackName1_reverb_l1.wav
-	    - TrackName1_reverb_l2.wav
-	    - TrackName1_reverb_l4.wav
+	    
     
 	
 And so on for each track.
