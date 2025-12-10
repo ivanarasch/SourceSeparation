@@ -152,24 +152,40 @@ Experiment 2: Effects experiment
 
 And so on for each track.
 
-## 5. Models and methodology:
-Presentation of models:
-Spleeter
-Presentation and history
-What does it use for doing source separation? 
-Pros and cons
-Performance for these situations
+## 5. Models
 
-	Demucs
-Presentation and history
-What does it use for doing source separation? Wave u net
-Pros and cons
-Performance for these situations
-Source separation process:
-How the models were used
-Show how it was passed through the models, and the outcoming results 
-Code modified to have for 2 tracks instead of 4 for experiment 1 for spleeter 
+For this study, we compared source separtion performances using the two models previously outlined: Spleeter and Demucs.
 
+#### Spleeter:
+Spleeter is an open-source music source separation library developed by Deezer in 2019. It can be used for separation of musical audio sources containing vocals, drums, bass and other accompaniment. It is designed for use in both research and practical production applications. To separate input sources, it relies on deep learning through a U-Net-based convolutional neural network. This allows us to input a waveform audio file, and receive audio files for each separated source derived from predicted spectrograms for each. Spleeter contains pre-trained models for separation of: 2-stem vocals with non-vocal elements, 4-stem vocals with bass, drums or other elements, and 5-stem vocals with bass, drums or multiple other elements. It can be run on GPU, and its results are comparable to better upkept models such as Demucs. For our implementation of Spleeter for Experiment 1, we made use of its 2-stem input capabilities.
+
+Pros of Spleeter: 
+- Allows for fast processing of audio files
+- Library is adaptable to multiple uses
+  
+Cons of Spleeter: 
+- Diminished performance on complex inputs
+- Lacks flexibility, does not retrain itself as it is used.
+
+This leads to believe that Spleeter will struggle with separating vocals from elements with similar harmonic content, such as guitar, for Experiment 1, and also strugggle with the processed inputs synthesized for Experiment 2.
+
+#### Demucs
+
+Demucs is an open-source music source separation model developed by Facebook AI Research (FAIR) in 2019. Demucs operates directly on the raw audio waveform using a Wave-U-Net architecture, which allows it to learn temporal and spectral features in a more intelligent fashion, reducing limitations. It is capable of separating audio into multiple stems, including vocals, drums, bass, and other accompaniment. Demucs can be run on a GPU for efficient processing.
+
+Pros of Demucs:
+
+- Ability to produce high quality output by using a method that results in fewer artifacts than spectrogram-based methods
+- Good handling of complex input and overrlapping harmonic structures 
+
+
+Flexible architecture allows fine-tuning for different instruments or genres
+
+Cons of Demucs:
+- Computationally inefficient and costly
+- Implementation in not user friendly
+
+These remarks suggest that Demucs may perform well in separating vocals from elements with similar harmonic content, such as guitar, for Experiment 1, and perform well in separating the processed synthesized inputs in Experiment 2.
 
 ## 6. Experiments and preprocessing
 
