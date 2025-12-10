@@ -110,52 +110,32 @@ Once we synthesized the test data of MUSDB18 to serve our purposes, the architec
 
 - musdb18synthesized/
 	- TrackName1/
-		- original/
-			- mix.wav
-			- vocals.wav
-			- bass.wav
-			- drums.wav
-			- other.wav
-		- interference_drums/
-			- mix.wav   # drums + vocals
-		- interference_bass/
-			- mix.wav   # bass + vocals
-		- interference_accompaniment/
-			- mix.wav   # accompaniment + vocals
-		- interference_other/
-			- mix.wav   # other + vocals
+		- accompainment_vocals.wav
+        - bass_vocals.wav
+        - drums_vocals.wav
+        - other_vocals.wav
 
 And so on for each track.
 
 #### Experiment 2: Impact of common audio effects on good separation of effected vocals from all non-vocal stems 
 
 - musdb18synthesized/
-	- TrackName1/
-		- original/
-			- mix.wav
-			- vocals.wav
-			- bass.wav
-			- drums.wav
-			- other.wav
-        
-		- reverb_l1/
-			- mix.wav
-		- reverb_l2/
-			- mix.wav
-		- reverb_l3/
-			- mix.wav
-		- reverb_l4/
-			- mix.wav
-
-		- delay_l1/
-        ...
-		- chorus_l1/
-        ...
-		- bitcrush_l1/
-        ...
-		- compression_l1/
-        …
-
+	-TrackName1/
+	    - TrackName1_original.wav
+	    - TrackName1_delay_l1.wav
+		- TrackName1_delay_l2.wav
+	    - TrackName1_delay_l4.wav
+	    - TrackName1_bitcrush_l1.wav
+		- TrackName1_bitcrush_l2.wav		
+		- TrackName1_bitcrush_l4.wav		
+		- TrackName1_compression_l1.wav	
+		- TrackName1_compression_l2.wav	
+		- TrackName1r_compression_l4.wav	
+	    - TrackName1_reverb_l1.wav
+	    - TrackName1_reverb_l2.wav
+	    - TrackName1_reverb_l4.wav
+    
+	
 And so on for each track.
 
 ## 5. Models
