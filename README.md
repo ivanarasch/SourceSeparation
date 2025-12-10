@@ -338,6 +338,10 @@ ADD CODE SNAPSHOT
 
 ## 8. Analysis and discussion
 
+EXP 1
+
+
+
 EXP 2
 Using the the unprocessed stems provided in the MUSDB18 dataset, we evaluated the performance of Spleeter and Demucs with the help of SI-SDR, SI-SAR-like, RMSE metrics. These unprocessed stems served as control data to compare with and upon which we could evaluate the capabilities of these models.
 
@@ -383,6 +387,8 @@ Bitcrushing
 
 From these results, we can see that both models fail badly at high levels of reverb, with Spleeter having slightly lower RMSE. The same is seen for delay, however in this instance Demucs presents the lower RMSE. In compressing, Spleeter outperforms Demucs overall, and in bitcrushing Demucs outperforms Spleeter. Thus, it is difficult to state which model performed better overall. What can be reiterated is that both models, at high levels of processing, source seperation is poorly accomplished.
 
+More specifically, Spleeter shows stronger performance when dynamics are distorted, such as in compression, while Demucs performs better when distorttion is applied in bitcrushing. When exaggerated temporal smearing is introduced with reverb and delay, again both models fail. However the type of failure differs: Spleeter tends to better reconstruct waveforms, whereas Demucs produces more artifacts in the waveform.
+
   
 ***
 
@@ -403,12 +409,7 @@ Give an overall rating of the performance = X INSTRUMENT INTERFERES MOST IN OBTA
 Pistes de réflexion 
 
 Experiment 2 discussion
-State how well sources were separated by 1. Spleeter and 2. Demucs, show scores
-Show examples of audio
-Discuss what did poorly and better for both models respectively
-Interpret what this says about each model, for all different effects
-Benchmark against the unaffected sources’ separation perfo/scores (perfect separation)
-Give an overall rating of the performance = X EFFECT INTERFERES MOST IN OBTAINING ACCURATE SEPARATION OF SOURCES. LEVELS OF EFFECT AND INSTRUMENTS EFFECTED CAUSE X IMPACT ON SEPARATION PERFORMANCE (SCORE). WHEN USING SPLEETER AND DEMUCS
+
 Pistes de réflexion, future work
 	Weaknesses of dataset
 As seen in this project…
