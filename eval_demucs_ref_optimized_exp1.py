@@ -1,6 +1,5 @@
 import os
 import numpy as np
-import sys
 import soundfile as sf
 import museval
 import librosa
@@ -40,10 +39,8 @@ def load_audio(path):
 
 def evaluate_pair(reference_files, estimate_files):
     """
-    Calculates BSSEval metrics for a pair of sources (e.g. Vocals + Accompaniment).
+    Calculates BSSEval metrics for a pair of sources.
     """
-    print(f"   Loading {len(estimate_files)} stems...")
-    
     # 1. Load Audio
     refs = [load_audio(p) for p in reference_files]
     ests = [load_audio(p) for p in estimate_files]
@@ -58,75 +55,109 @@ def evaluate_pair(reference_files, estimate_files):
     estimates = np.stack(ests)
 
     # 4. Compute Metrics
-    # win=1.0 uses standard 1-second framing (recommended)
-    # win=float('inf') uses global scoring (faster, but less detailed)
     scores = museval.evaluate(references, estimates, win=1.0)
     return scores
 
-def get_instrument_name_from_folder(folder_name):
+def find_model_files(model_root, song_name, stem_name):
     """
-    Infers the instrument name from the folder 'instrument_vocals'.
-    e.g., 'bass_vocals' -> 'bass'
-          'accompaniment_vocals' -> 'accompaniment'
+    Tries to find the model's output files by checking both folder structures.
+    
+    Structure A (Nested): ModelRoot / SongName / stem_vocals / [vocals.wav, accompaniment.wav]
+    Structure B (Flat):   ModelRoot / SongName_stem / [vocals.wav, no_vocals.wav]
+    
+    Returns: (list_of_file_paths, structure_type_name) or (None, None)
     """
-    # Split by '_vocals' (assuming folder structure is always 'something_vocals')
-    if "_vocals" in folder_name:
-        return folder_name.replace("_vocals", "")
-    return "accompaniment" # Default fallback
+    
+    # --- Strategy 1: Nested Structure (Spleeter-style) ---
+    # Folder: SongName / bass_vocals
+    nested_dir = os.path.join(model_root, song_name, f"{stem_name}_vocals")
+    if os.path.exists(nested_dir):
+        # Check standard filenames
+        v_path = os.path.join(nested_dir, "vocals.wav")
+        acc_path = os.path.join(nested_dir, "accompaniment.wav")
+        
+        # Sometimes Nested uses 'no_vocals.wav' too, check for it
+        if not os.path.exists(acc_path):
+            acc_path = os.path.join(nested_dir, "no_vocals.wav")
+            
+        if os.path.exists(v_path) and os.path.exists(acc_path):
+            return [v_path, acc_path], "Nested"
 
-def evaluate_song_folder(model_name, model_root, ref_root, song_folder):
+    # --- Strategy 2: Flat Structure (Demucs-style) ---
+    # Folder: SongName_bass
+    flat_dir_name = f"{song_name}_{stem_name}"
+    flat_dir = os.path.join(model_root, flat_dir_name)
+    
+    if os.path.exists(flat_dir):
+        # Demucs typically uses 'no_vocals.wav' instead of 'accompaniment.wav'
+        v_path = os.path.join(flat_dir, "vocals.wav")
+        acc_path = os.path.join(flat_dir, "no_vocals.wav")
+        
+        # Fallback if named accompaniment.wav
+        if not os.path.exists(acc_path):
+            acc_path = os.path.join(flat_dir, "accompaniment.wav")
+
+        if os.path.exists(v_path) and os.path.exists(acc_path):
+            return [v_path, acc_path], "Flat"
+
+    return None, None
+
+def evaluate_song(model_name, model_root, ref_root, song_folder):
     results = []
     
-    # Path to specific song in Model and Reference
-    model_song_path = os.path.join(model_root, song_folder)
+    # Path to specific song in Reference (Ground Truth is assumed to always be Nested)
     ref_song_path = os.path.join(ref_root, song_folder)
 
+    # Identify stems based on Reference folders (e.g. bass_vocals, drums_vocals)
+    # We iterate the REFERENCE folders to know what to look for in the Model
     if not os.path.exists(ref_song_path):
-        print(f"   [Skipping] Song '{song_folder}' not found in Reference directory.")
         return results
 
-    # Iterate over combinations (bass_vocals, drums_vocals, etc.)
-    combinations = [d for d in os.listdir(model_song_path) 
-                   if os.path.isdir(os.path.join(model_song_path, d))]
+    subfolders = [d for d in os.listdir(ref_song_path) 
+                  if os.path.isdir(os.path.join(ref_song_path, d))]
 
-    for combo in combinations:
-        model_combo_path = os.path.join(model_song_path, combo)
-        ref_combo_path = os.path.join(ref_song_path, combo)
+    for sub in subfolders:
+        # Expecting folders like "bass_vocals", "drums_vocals"
+        if not sub.endswith("_vocals"):
+            continue
+            
+        # Extract "bass", "drums", "accompaniment"
+        stem_name = sub.replace("_vocals", "")
+        
+        # 1. Get Reference Files
+        ref_dir = os.path.join(ref_song_path, sub)
+        ref_files = [
+            os.path.join(ref_dir, "vocals.wav"),
+            os.path.join(ref_dir, "accompaniment.wav") # Assuming ref uses this name
+        ]
+        
+        if not all(os.path.exists(f) for f in ref_files):
+            # Check for alternative ref naming
+            ref_files[1] = os.path.join(ref_dir, "no_vocals.wav")
+            if not all(os.path.exists(f) for f in ref_files):
+                continue
 
-        if not os.path.exists(ref_combo_path):
-            print(f"   [Skipping] Combination '{combo}' missing in Reference.")
+        # 2. Find Corresponding Model Files (Auto-detect structure)
+        est_files, struct_type = find_model_files(model_root, song_folder, stem_name)
+        
+        if not est_files:
+            print(f"   [Missing] Could not find {stem_name} for {song_folder} in {model_name}")
             continue
 
-        # Define file targets based on your screenshot
-        # We expect: 'vocals.wav' and 'accompaniment.wav'
-        targets = ['vocals.wav', 'accompaniment.wav']
-        
-        ref_files = [os.path.join(ref_combo_path, t) for t in targets]
-        est_files = [os.path.join(model_combo_path, t) for t in targets]
+        print(f"   Evaluating: {song_folder} | {stem_name} (Found {struct_type} style)")
 
-        # Check if all files exist
-        if not all(os.path.exists(f) for f in ref_files + est_files):
-            print(f"   [Warning] Missing .wav files in {combo}. Skipping.")
-            continue
-
-        # Determine Source Names for logging
-        # Target 0 is always Vocals
-        # Target 1 is the 'Instrument' defined by the folder name
-        inst_name = get_instrument_name_from_folder(combo)
-        source_names = ["vocals", inst_name]
-
-        print(f"   Evaluating: {song_folder} | {combo}")
-        
         try:
+            # Source 0 = Vocals, Source 1 = The Instrument (Bass/Drums/etc)
             sdr, isr, sir, sar = evaluate_pair(ref_files, est_files)
             
-            # Append results for both sources
-            for i, source in enumerate(source_names):
+            source_labels = ["vocals", stem_name]
+            
+            for i, label in enumerate(source_labels):
                 results.append({
                     "Model": model_name,
                     "Song": song_folder,
-                    "Combination": combo,   # e.g., bass_vocals
-                    "Source": source,       # e.g., bass
+                    "Combination": sub,       # e.g. bass_vocals
+                    "Source": label,          # e.g. bass
                     "SDR": np.nanmedian(sdr[i]),
                     "SIR": np.nanmedian(sir[i]),
                     "SAR": np.nanmedian(sar[i]),
@@ -134,53 +165,49 @@ def evaluate_song_folder(model_name, model_root, ref_root, song_folder):
                 })
 
         except Exception as e:
-            print(f"   [Error] Failed to evaluate {song_folder}/{combo}: {e}")
+            print(f"   [Error] Evaluation failed: {e}")
 
     return results
 
 def main():
-    parser = argparse.ArgumentParser(description="Compare Source Separation Models.")
+    parser = argparse.ArgumentParser(description="Universal Source Separation Evaluation.")
     
-    # 1. Reference Directory (Ground Truth)
-    parser.add_argument("--ref", required=True, help="Path to the Ground Truth (Reference) Root Directory")
-    
-    # 2. Output File
-    parser.add_argument("--output", default="model_comparison_results.xlsx", help="Output Excel filename")
-
-    # 3. Model Directories (Accepts multiple)
-    # Usage: --models "Path/To/ModelA" "Path/To/ModelB"
-    parser.add_argument("--models", nargs='+', required=True, help="List of paths to Model Output Root Directories")
+    parser.add_argument("--ref", required=True, help="Path to Reference (Ground Truth) Root")
+    parser.add_argument("--models", nargs='+', required=True, help="List of Model Root Directories")
+    parser.add_argument("--output", default="comparison_results.xlsx", help="Output Excel filename")
 
     args = parser.parse_args()
 
     all_results = []
-
     print(f"Reference Path: {args.ref}")
+
+    # We iterate over the SONGS in the REFERENCE folder first
+    # This ensures we only look for songs that actually exist in the ground truth
+    ref_songs = [d for d in os.listdir(args.ref) if os.path.isdir(os.path.join(args.ref, d))]
     
-    # Iterate over each model provided
     for model_path in args.models:
-        model_name = os.path.basename(os.path.normpath(model_path)) # Use folder name as Model Name
+        model_name = os.path.basename(os.path.normpath(model_path))
         print(f"\n--- Processing Model: {model_name} ---")
         
         if not os.path.exists(model_path):
-            print(f"Error: Model path not found: {model_path}")
+            print(f"Error: Path not found {model_path}")
             continue
 
-        # Iterate over songs in the model folder
-        songs = [d for d in os.listdir(model_path) if os.path.isdir(os.path.join(model_path, d))]
-        
-        for song in songs:
-            results = evaluate_song_folder(model_name, model_path, args.ref, song)
+        for song in ref_songs:
+            # Skip hidden folders
+            if song.startswith("."): continue
+            
+            results = evaluate_song(model_name, model_path, args.ref, song)
             all_results.extend(results)
 
-    # Save to Excel
     if all_results:
         df = pd.DataFrame(all_results)
         df.to_excel(args.output, index=False)
-        print(f"\nSuccess! Results saved to: {args.output}")
-        print(df.groupby(["Model", "Source"])["SDR"].median()) # Print a quick summary
+        print(f"\nSuccess! Saved to {args.output}")
+        # Print valid SDR summary
+        print(df.groupby(["Model", "Source"])["SDR"].median())
     else:
-        print("\nNo results computed. Check your folder paths.")
+        print("\nNo results generated. Check paths.")
 
 if __name__ == "__main__":
     main()
