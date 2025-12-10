@@ -11,7 +11,7 @@ Table of contents
 8. Analysis and discussion
 9. Bibliography
 
-Intro, background and overview of project:
+1. Intro, background and overview of project:
 
 Through our project, we aim to answer the following question:
 
@@ -48,7 +48,7 @@ What challenges?
 Background 
 Justification (Background of the project, why it’s relevant to look at this, how the results can be helpful to the domain…)
 
-Lit review:
+2. Lit review:
 
 Through a review of freely available literature on the topics of BSS (Blind Source Separation) as a whole, MUSDB18 dataset, source separation models, specifically Spleeter and Demucs, BSS evaluation metrics, the limitations and strengths of these topics were identified.
 
@@ -81,7 +81,7 @@ Overall, the WASPAA proposed metrics Compare signals in a perceptual or learned 
 Remains to be seen how we can implement these metrics for our project. 
 
 
-Pipeline:
+3. Pipeline:
 general overview of what order we do the project and why this is the right way.
 References to other similar projects that use the same pipeline 
 
@@ -118,9 +118,7 @@ Analysis of results, scores, quality and performance for each model
 
 We decided to use this pipeline for our
 
-
-
-Dataset and architecture:
+4. Dataset and architecture:
 
 We made use of the MusDB18 dataset as the dataset for our source separation project. We made use of the separated stems as well as the full mixes of the tracks to impose difficult conditions onto the tracks for the purposes of our research into how the Spleeter and Demucs models handle challenging conditions, according to our pipeline and experiment structure.
 
@@ -198,7 +196,7 @@ How the models were used
 Show how it was passed through the models, and the outcoming results 
 Code modified to have for 2 tracks instead of 4 for experiment 1 for spleeter 
 
-Experiments and preprocessing:
+5. Experiments and preprocessing:
 
 Though referred to as experiments, carrying out the experiment itself is fairly simple: feed the preprocessed audio into Spleeter or Demucs, run the separation, and collect the outputs. The bulk of our work was done through the data synthesis. 
 
@@ -230,7 +228,8 @@ See below code examples to see the process for the reverb effect:
 
 
 The method used here applies each effect and its levels in separate loops manually, which work for the task at hand, however this method is indeed repetitive, harder to maintain, and less flexible than others. To improve, the workflow could adopt modular effect chains or object-oriented effect classes, allowing multiple effects to be applied sequentially or in parallel in a reusable, maintainable way. Potential approaches could reduce code duplication, make it easier to experiment with different effect combinations, and bring the processing pipeline closer to modern, state-of-the-art audio engineering practices. To be explored in future work.
-Presentation of evaluation metrics:
+
+7. Presentation of evaluation metrics:
 
 To evaluate the performance of source separation models, standard metrics such as SAR, SDR, SIR and ISR are used.
 
@@ -254,7 +253,8 @@ See below how we implemented the evaluation process through code and with the he
 ADD CODE SNAPSHOT
 
 
-Analysis and discussion:
+8. Analysis and discussion:
+
 Interpretation of results
 Experiment 1 discussion 
 State how well sources were separated by 1. Spleeter and 2. Demucs, show scores
@@ -284,4 +284,4 @@ Limited variety of styles
 Metrics for evaluation suck
 Only tradition instrumentation
 
-Bibliography:
+9. Bibliography:
