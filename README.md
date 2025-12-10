@@ -185,12 +185,59 @@ To create this new data for the purpose of creating a challenging condition for 
 
 We iterated over each track to extract the original stems and then created new synthetic mixtures by adding vocals to a single stem at a time while keeping the remaining stems unchanged. We then wrote each mixture as a WAV file in a structured directory alongside the original stems, providing controlled, reproducible scenarios to evaluate the models’ performance.
 
-
 See code example below:
 
-- dsknfcksdnf
+(It should be noted that a number of libraries, listed below, needed to be imported as well as file paths defined, to allow for synthesis and storage of data.)
+
+```import os
+os.environ["PATH"] = "/opt/homebrew/Cellar/ffmpeg/8.0_2/bin:" + os.environ["PATH"]
+import sys
+sys.path.append("/Users/ivanarasch/Desktop/GradSchool/MIR/SourceSeparationProject")
+
+import musdb
+import stempeg
+import ffmpeg
+import utils
+import importlib
+import numpy as np
+import matplotlib.pyplot as plt
+import soundfile as sf
+import librosa
+import librosa.display
+import IPython.display as ipd
+from pathlib import Path
+
+mus = musdb.DB(
+    root="/Users/ivanarasch/Desktop/GradSchool/MIR/SourceSeparationProject/musdb18",
+    subsets="train",  # or "test"
+    is_wav=False      
+)
+
+...
+
+# Data synthesis for experiment 1
+
+vocals = track.targets['vocals'].audio
+drums = track.targets['drums'].audio
+accompaniment = track.targets ['accompaniment'].audio
+bass = track.targets['bass'].audio
+other = track.targets['other'].audio
+
+drums_vocals = drums + vocals
+accompaniment_vocals = accompaniment + vocals
+bass_vocals = bass + vocals
+other_vocals = other + vocals
+
+import soundfile as sf
+
+sf.write("drums_vocals.wav", drums_vocals, track.rate)
+sf.write("accompaniment_vocals.wav", accompaniment_vocals, track.rate)
+sf.write("bass_vocals.wav", bass_vocals, track.rate)
+sf.write("other_vocals.wav", other_vocals, track.rate)
+```
   
-Once we had synthesized the new data, as outlined in the last block of code seen above, we were able to use it in for source separation.
+Once we had synthesized the new data, as outlined in the last block of code seen above, we were able to use it for source separation.
+
 While this approach of creating vocal interference mixtures is logical within our study, several modifications could make the modified data more challenging for the models. For example, adjusting the balance of dynamics between vocal and instrument to simulate real-world dynamics where vocals may be louder or softer relative to the accompaniment, mixing vocals with multiple stems simultaneously, and combining vocals with stems from different tracks. All of these could be potential avenues for exploring interference of different elements with vocals.
 
 #### Experiment 2: Impact of common audio effects on good separation of effected vocals from all non-vocal stems 
@@ -208,7 +255,60 @@ The processing was applied exclusively to the vocal stem, to aid in simplicity o
 In the future, it would be of interest to see how well the models would perform in source separation with different elements of each track being processed.
 See below code examples to see the process for the reverb effect:  
 
-- dsknfcksdnf
+```REVERB_LEVELS = [
+    {"delay_ms": 30, "repeats": 2},
+    {"delay_ms": 50, "repeats": 3},
+    {"delay_ms": 80, "repeats": 4},
+    {"delay_ms": 120, "repeats": 5},
+]
+
+def apply_effect(vocals_np, rate, effect_func, params):
+    vocal_audio = utils.audiosegment_from_numpy(vocals_np, rate)
+    fx_vocals = effect_func(vocal_audio, **params)
+    return utils.audiosegment_to_numpy(fx_vocals)
+mus = musdb.DB(root="musdb18", subsets="test")
+
+OUTPUT_ROOT = Path("musdb18synthesized")
+OUTPUT_ROOT.mkdir(exist_ok=True)
+
+for track in mus.tracks:
+    print(f"\n=== Processing {track.name} ===")
+
+    track_dir = OUTPUT_ROOT / track.name
+    (track_dir / "original").mkdir(parents=True, exist_ok=True)
+
+    rate = track.rate
+    mix = track.audio
+
+    vocals = track.targets["vocals"].audio
+    bass = track.targets["bass"].audio
+    drums = track.targets["drums"].audio
+    other = track.targets["other"].audio
+
+    # Save original stems + mix
+    sf.write(track_dir / "original" / "mix.wav", mix, rate)
+    sf.write(track_dir / "original" / "vocals.wav", vocals, rate)
+    sf.write(track_dir / "original" / "bass.wav", bass, rate)
+    sf.write(track_dir / "original" / "drums.wav", drums, rate)
+    sf.write(track_dir / "original" / "other.wav", other, rate)
+
+    # =============================
+    # Apply each effect
+    # =============================
+
+    # Reverb
+    for i, params in enumerate(REVERB_LEVELS, 1):
+        out = track_dir / f"reverb_l{i}"
+        out.mkdir(exist_ok=True)
+
+        fx_vocals = apply_effect(vocals, rate, utils.add_reverb, params)
+
+        fx_mix = mix.copy()
+        fx_mix[:len(vocals)] += fx_vocals - vocals
+        fx_mix = fx_mix.clip(-1, 1)
+
+        sf.write(out / "mix.wav", fx_mix, rate)
+```
 
 The method used here applies each effect and its levels in separate loops manually, which work for the task at hand, however this method is indeed repetitive, harder to maintain, and less flexible than others. To improve, the workflow could adopt modular effect chains or object-oriented effect classes, allowing multiple effects to be applied sequentially or in parallel in a reusable, maintainable way. Potential approaches could reduce code duplication, make it easier to experiment with different effect combinations, and bring the processing pipeline closer to modern, state-of-the-art audio engineering practices. This remains to be explored in future work.
 
@@ -231,12 +331,12 @@ On the contrary, Museval is the standard for evaluation of discriminately separa
 
 Finally, we opted to use SI-SDR and SI-SAR as evaluation metrics. They represent an improvement upon the standard metrics outlined above while maintaining simplicity of application, contrarily to those introduced by WASPAA. They possess sensitivity to distortion and artifacts, and although these metrics still rely on ground truth stems, they allow us to objectively assess model performance on the MUSDB18 dataset and provide a consistent baseline for comparing different separation models on the challenging conditions.
  
-See below how we implemented the evaluation process through code and with the help of sigsep_museval for both of our experiments:
+See below how we implemented the evaluation process through code and with the help of of evluation library for both of our experiments:
 
 ADD CODE SNAPSHOT
 
 
-8. Analysis and discussion:
+## 8. Analysis and discussion
 
 Interpretation of results
 Experiment 1 discussion 
