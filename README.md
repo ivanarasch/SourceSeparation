@@ -21,46 +21,19 @@ Through our project, we aim to answer the following question:
 
 #### How do state-of-the-art methods handle challenging conditions?
 
-To do so, we made use of the MUSDB18 dataset as well as the source separation models Spleeter and Demucs. This dataset provides users with 150 songs in their full mix (all stems combined) as well as in their separate stems. 
+We used the MUSDB18 dataset and the source separation models Spleeter and Demucs. Source separation reverses the mixing process to isolate stems. Models learn patterns to reconstruct isolated sources from a full mix.
 
-Most mainstream western music is composed of a number of instruments played together. In recorded music practices, each instrument or source is generally recorded individually before being combined, or mixed, in a post-production phase to result in a track that assembles all sources together to represent the original piece itself. Seeing most listeners simply have access to full mixes, source separation takes on the task of reservising the aforementioned post production mixing process so as to obtain individual stems of each source. 
+We focused on two factors:
 
-In this context, a model refers to a machine-learning system trained to predict individual audio sources from a mixture. These models learn patterns—spectral, temporal, and timbral—that correspond to particular instruments. When a new full mix is fed in, the model attempts to reconstruct the isolated stems based on what it has learned during training.
-
-There are a number of models that excel at source separation under the following conditions:
-
-- Full mix and separated stems provided
-- Music of certain genres upon which the model has been trained (mainly western)
-- Traditional instrumentation (guitar, bass, drums, vocals)
-
-Source separation is becoming increasingly present in the spheres of music production, engineering, mixing and mastering as well as in regards to music sciences. Many of these practitioners are users of source separation algorithms and programs such as Ozone, or are simply looking for separated stems for educational and musical purposes. However, many report issues with these source separators, reporting problems with the source separators’ accuracy. Some issues reported include difficulty extracting vocals without drum interference, failure to separate sources without causing artifacts, and more.
-
-Indeed, a number of factors can cause hiccups in the proper and high-quality separation of sources. And more generally, state of the art source separation techniques have many limitations. These factors could be linked to genre, untraditional instrumentation, use of effects and more. Seeing as all of these are common occurrences in music today, this represents an area for improvement in the area of source separation.
-
-Thus, we decided to focus on two factors to see how they affect the performance of certain models on the high-quality separation of sources:
-
-- The impact of different non-vocal elements on extracting vocals from a full mix, to obtain separated stems (vocals stem and X instrument stem)
-- The impact of different audio processing effects and their level of intensity on separation of all sources from a full mix, to obtain affected vocals separated from dry stems.
-
-To do this, we took all songs of the dataset and processed them accordingly to have the necessary data for our experiments; so as to be able to evaluate the performance of the models in question on these challenging conditions, which are relevant to musical, academic practices as well as to the advancement of source separation as an area of study. More on the data processing techniques in the following sections.
+- Impact of different non-vocal elements on extracting vocals
+- Impact of different audio processing effects on separation of all sources
 
 ## 2. Literature review
+Through a review of literature on BSS, MUSDB18, Spleeter, Demucs, and evaluation metrics, limitations and strengths were identified.
 
-Through a review of freely available literature on the topics of BSS (Blind Source Separation) as a whole, MUSDB18 dataset, source separation models, specifically Spleeter and Demucs, BSS evaluation metrics, the limitations and strengths of these topics were identified.
+MUSDB18 and the chosen models are industry standard. Current BSS struggles with limited datasets, mainstream genres, and phase handling. Wave-U-Net (used in Demucs) improves time-domain separation. Evaluation metrics often rely on ground truth stems, though embedding-based metrics offer perceptual improvements.
 
-First, as seen across much literature, the MUSDB dataset is widely used, as are the Spleeter and Demucs models. Their use ensures that we are employing "industry standard’” elements in our project, additionally allows us to better contribute to the field of MIR as well and hopefully present clear paths for improvement on widely used tools within the domain. This observation and understanding guided our decision to deeply explore these resources in particular through this study.
-
-Many sources and recent work on the topic highlight the many weaknesses of current day state of the art BSS. The principal being the limited availability of datasets. As previously mentioned, BSS models are often trained and tested on datasets which have few tracks, are dominated by mainstream genres and professionally produced, such as MUSDB18, our dataset in question. Indeed, it is common knowledge that finding individual stems alongside full mixes is challenging. This represents a fundamental issue in the advancement of BSS. If models could use only full mixes, or if there were widespread access to individual stems of tracks, they could be trained on datasets that vary in genre, including non-western musical styles, untraditional spatialization, a wider variety of instrumentation, electronic instruments…
-
-In one article, Namballa, Roginska, and Fuentes (2025) show that existing separation models often fail to preserve spatial information, underscoring the need for a greater variety of specialized datasets. They emphasize the limitations of conventional evaluation metrics and highlight the need for greater variety of dataset, and specialization datasets for source separation. In brief, availability of data outside the mainstream for source separation could greatly improve its progress.
-
-Another common downfall of BSS is the handling of phase. Stoller, Ewert, and Dixon (2018) highlight that magnitude-only spectrogram-based source separation methods often ignore phase information, which effectively limits performance and can lead to outputs which are perceptually inadequate for human listeners. In their work, the authors discuss possible avenues to address these issues, such as the Wave-U-Net technique, which is used by Demucs. Wave-U-Net implements a neural network architecture so as to separate sources from a full mix with the time-domain representation directly. It employs encoder and decoder layers of varying lengths (downsampling and upsampling), recognizing timbral and rhythmic patterns within the song so as to separate sources from the mix. In such, Wave-U-Net avoids STFT-based phase reconstruction, resulting in a reduction phase-related limitations. However, it still generally relies on intrusive metrics like SDR, which require isolated stems for evaluation. 
-
-This naturally raises the question of the quality and practicality of evaluation metrics. Undoubtedly, the current methods most commonly used for BSS evaluation leave much to be desired. In one paper by Bereuter, Stahl, Plumbley, and Sontacchi (2025) the authors examine these limitations and propose moving towards evaluation implementations and metrics that are increasingly perceptually grounded and better reflect human listening. The principal contribution of their work suggests a redefinition of evaluation, specifically for singing voice separation, proposing learned embedding spaces instead of the standard waveform-level comparisons. These proved to correlate more strongly with human judgements.
-
-The paper outlines several models that exemplify this new perceptual, reference-free evaluation paradigm, such as XLS-R-SQA, Audiobox Aesthetics, PAM and SingMOS. These methods offer a reference-free evaluation which is advantageous for generatively separated sources, as opposed to the traditional metrics which rely on ground truth stems. This reliance can often lead to penalization of perceptually adequate outputs that diverge from the reference waveform. Contrarily, embedding based metrics such as ViSQOL, multi-resolution STFT, MERT, and Music2LatentTraditional align more accurately with human evaluation. These models also attack the problem of reliance on pre-split tracks, allowing for source separation of potentially any song.
-
-In conclusion, after being able to draw that BSS struggles with conditions out of the ordinary, and paired with our research question, we designed the two previously mentioned experiments to judge the performance of the models chosen. The first experiment serves the purpose of determining what non-vocal elements cause the most interference and result in poor outputs. The second tests how the models can perform on processed, or unusual inputs. These both serve the purpose of filling gaps in the literature reviewed, as many discuss more technical things but don’t tackle more commonplace, production and engineering focused problems. 
+In conclusion, BSS struggles with unusual conditions. Our experiments address interference from non-vocal elements and effects processing, filling gaps in the literature.
 
 ## 3. Pipeline
 
@@ -68,44 +41,29 @@ We chose the following pipeline for our project for each experiment:
 
 #### Experiment 1: Impact of instrumental interference on isolation of vocal tracks when processed using Spleeter and Demucs
 
-1. Obtain MUSDB18 dataset tracks (used the 50 test tracks of the dataset)
-2. Load track
-3. E xtract stems (vocals, drums, bass, other, accompaniment)
-4. Combine each non-vocal stem with vocals, to result in a mixed track of vocal + non-vocal stem for the number of non-vocal stems included in each song of the dataset. (See next section for further detail on this process.)
-5. Take this processed data and compile it into its data architecture. See next section for more details on this.
-6. Obtain new processed dataset
-7. Run the all processed data through Spleeter
-8. Run all processed data through Demucs
-9. Obtain separated sources: for each mixed track of vocal + non-vocal stem, will obtain 2 tracks: one track of vocals, one track of non-vocals.
-10. Evaluate the quality of separation for each and every track of the new and processed dataset with the help of traditional evaluation metrics. (See Section 7 for further details on this.)
-11. Analysis of results, scores, quality and performance for each model.
+1. Obtain MUSDB18 tracks (50 test tracks)
+2. Extract stems
+3. Combine vocals with each non-vocal stem
+4. Compile processed data
+5. Run through Spleeter and Demucs
+6. Obtain separated sources
+7. Evaluate using standard metrics
+8. Analyze results
 
 #### Experiment 2: Impact of common audio effects on good separation of effected vocals from all non-vocal stems 
 
-1. Obtain MUSDB18 dataset tracks (used the 50 test tracks of the dataset)
-2. Load track
-3. Extract stems (vocals, drums, bass, other, accompaniment)
-4. Apply a given effect of vocal stems for each track of the dataset.
-5. Combine the affected vocal with the remaining unaffected stems, to obtain a single full mix track with an affected vocal. (See next section for further detail on this process.)
-6. Take this processed data and compile it into its data architecture. See next section for more details on this.
-7. Run all processed data through Spleeter
-8. Run all processed data through Demucs
-9. Obtain separated sources: for each mixed track of affected vocal + all non-vocal stems; will obtain the same amount of tracks as there are different sources present in the full mix.
-10. Evaluate the quality of separation for each and every track of the new and processed dataset with the help of traditional evaluation metrics. (See Section 7 for further details on this.)
-11. Analysis of results, scores, quality and performance for each model.
+1. Obtain MUSDB18 tracks (50 test tracks)
+2. Extract stems
+3. Apply effects to vocals (reverb, delay, bitcrush, compression)
+4. Combine affected vocals with remaining stems
+5. Compile processed data
+6. Run through Spleeter and Demucs
+7. Obtain separated sources
+8. Evaluate and analyze
 
 ## 4. Dataset and architecture
 
-We made use of the MUSDB18 dataset as the dataset for our source separation project. We made use of the separated stems as well as the full mixes of the tracks to impose difficult conditions onto the tracks for the purposes of our research into how the Spleeter and Demucs models handle challenging conditions, according to our pipeline and experiment structure.
-
-We chose MUSDB18 because it is widely used for MIR and source separation research projects, and has become the industry standard within this area of study. This allows for effective benchmarking within the field, as well as the possibility to directly compare ours to other studies. Despite its popularity, this dataset possesses several limitations as noted in literature, such as its small size (150 tracks), the lack of diversity in the training data and restricted genre representation and musical styles. By making use of this dataset, we get to witness firsthand these limitations, and how they impact our final results when testing on challenging sources – more to come in the analysis section.
-
-As previously mentioned, MUSDB18 contains 150 tracks, with a training set of 100 songs and a test set of 50 songs. For each track within MUSDB18, there is one audio file of the track’s full mix (all instruments together), as well as up to 5 other audio files for each individual element of the song. The prescribed track format is as follows: vocals, bass, drums, accompaniment and other. We noticed that accompaniment often meant piano and other often meant guitar, but remained open for less common instruments. Further, the tracks were all stereo, with a sample rate of 44.1 kHz and a bit rate of 256 kbps (AAC). 
-
-The 150 tracks were sourced from a variety of sources: 100 tracks from dsd100, 46 tracks from medleyDB, 2 tracks from NIfreestems, 2 tracks from The Easton Ellises.
-
-Once we synthesized the test data of MUSDB18 to serve our purposes, the architecture for each experiment respectively looked as such:
-
+We used MUSDB18: 150 tracks (100 train, 50 test), stereo, 44.1 kHz, 256 kbps. Stems: vocals, bass, drums, accompaniment, other.
 #### Experiment 1: Impact of instrumental interference on isolation of vocal tracks when processed using Spleeter and Demucs
 
 - musdb18SynthesizedExperiment1/
@@ -134,8 +92,6 @@ And so on for each track. Total of 200 songs
         -  TrackName1_reverb_l1.wav
         -  TrackName1_reverb_l2.wav
         -  TrackName1_reverb_l4.wav
-	    
-    
 	
 And so on for each track. Total of 650 songs
 
@@ -144,59 +100,40 @@ And so on for each track. Total of 650 songs
 For this study, we compared source separtion performances using the two models previously outlined: Spleeter and Demucs.
 
 #### Spleeter:
-Spleeter is an open-source music source separation library developed by Deezer in 2019. It can be used for separation of musical audio sources containing vocals, drums, bass and other accompaniment. It is designed for use in both research and practical production applications. To separate input sources, it relies on deep learning through a U-Net-based convolutional neural network. This allows us to input a waveform audio file, and receive audio files for each separated source derived from predicted spectrograms for each. Spleeter contains pre-trained models for separation of: 2-stem vocals with non-vocal elements, 4-stem vocals with bass, drums or other elements, and 5-stem vocals with bass, drums or multiple other elements. It can be run on GPU, and its results are comparable to better upkept models such as Demucs. For our implementation of Spleeter for Experiment 1, we made use of its 2-stem input capabilities.
 
-Pros of Spleeter: 
-- Allows for fast processing of audio files
-- Library is adaptable to multiple uses
-  
-Cons of Spleeter: 
-- Diminished performance on complex inputs
-- Lacks flexibility, does not retrain itself as it is used.
+https://github.com/deezer/spleeter
 
-This leads to believe that Spleeter will struggle with separating vocals from elements with similar harmonic content, such as guitar, for Experiment 1, and also strugggle with the processed inputs synthesized for Experiment 2.
+- Open-source, U-Net-based CNN
+- Pre-trained for 2, 4, 5 stems
+- Fast, adaptable
+- Struggles on complex inputs
 
 #### Demucs
 
-Demucs is an open-source music source separation model developed by Facebook AI Research (FAIR) in 2019. Demucs operates directly on the raw audio waveform using a Wave-U-Net architecture, which allows it to learn temporal and spectral features in a more intelligent fashion, reducing limitations. It is capable of separating audio into multiple stems, including vocals, drums, bass, and other accompaniment. Demucs can be run on a GPU for efficient processing.
+https://github.com/facebookresearch/demucs
 
-Pros of Demucs:
-
-- Ability to produce high quality output by using a method that results in fewer artifacts than spectrogram-based methods
-- Good handling of complex input and overrlapping harmonic structures 
-
-
-Flexible architecture allows fine-tuning for different instruments or genres
-
-Cons of Demucs:
-- Computationally inefficient and costly
-- Implementation in not user friendly
-
-These remarks suggest that Demucs may perform well in separating vocals from elements with similar harmonic content, such as guitar, for Experiment 1, and perform well in separating the processed synthesized inputs in Experiment 2.
+- Wave-U-Net, time-domain separation
+- High-quality outputs, fewer artifacts
+- Flexible, handles complex input
+- Computationally costly
 
 ## 6. Experiments and preprocessing
+Though referred to as experiments, carrying out the experiment itself is fairly simple: feed the preprocessed audio into Spleeter or Demucs, run the separation, and collect the outputs. The bulk of our work was done through the data synthesis. We synthesized the 50 test tracks included in MUSDB18.
 
-Though referred to as experiments, carrying out the experiment itself is fairly simple: feed the preprocessed audio into Spleeter or Demucs, run the separation, and collect the outputs. The bulk of our work was done through the data synthesis. We synthesized the 50 test tracks included in MUSDB18. 
+Experiment 1: Impact of instrumental interference on isolation of vocal tracks when processed using Spleeter and Demucs
 
-#### Experiment 1: Impact of instrumental interference on isolation of vocal tracks when processed using Spleeter and Demucs
+As previously mentioned, through our study, we wished to understand the impact that different instruments and accompaniments can have on the separation of vocals. For each track of the dataset, we generated new audio by pairing the vocal stem with each instrument stem, allowing us to evaluate how well the models could separate them.
 
-As previously mentioned, through our study, we wished to understand the impact that different instruments and accompaniments can have on the separation of vocals, and what unique reactions and interferences can be caused by each element of an arrangement. For each track of the dataset, we generated new audio by pairing the vocal stem with each instrument stem,, allowing us to evaluate how well the models could separate them. For example: vocals vs. bass, vocals vs. guitar, vocals vs. drums, vocals vs. piano.
+This aligns with common practices within MIR and audio engineering research.
 
-This aligns with common practices within MIR and audio engineering research. Manipulations of data such as these are commonly used study effects of instrument combinations, effects, or mix complexity on source separation. In practical applications like mixing, mastering, or education, accurate separation of individual sources remains a challenge, and certain instruments being difficult to separate cleanly from vocals is a common issue, thus it is worthwhile to begin investigating which instruments cause the most interference and difficulties for models.
+To create this new data, we combined the isolated vocal stem with each individual non-vocal stem (drums, bass, other, and accompaniment) from the MUSDB18 dataset using Python and the musdb library.
 
-To create this new data for the purpose of creating a challenging condition for the models and according to our first experiment, we combined the isolated vocal stem with each individual non-vocal stem (drums, bass, other, and accompaniment) from the MUSDB18 dataset using Python and the musdb library.
+We iterated over each track to extract the original stems and then created new synthetic mixtures by adding vocals to a single stem. We then wrote each mixture as a WAV file in a structured directory alongside the original stems.
 
-We iterated over each track to extract the original stems and then created new synthetic mixtures by adding vocals to a single stem at a time while keeping the remaining stems unchanged. We then wrote each mixture as a WAV file in a structured directory alongside the original stems, providing controlled, reproducible scenarios to evaluate the models’ performance.
+See examples below:
 
-See code example below:
-
-(It should be noted that a number of libraries, listed below, needed to be imported as well as file paths defined, to allow for synthesis and storage of data.)
-
-```import os
-os.environ["PATH"] = "/opt/homebrew/Cellar/ffmpeg/8.0_2/bin:" + os.environ["PATH"]
-import sys
-sys.path.append("/Users/ivanarasch/Desktop/GradSchool/MIR/SourceSeparationProject")
-
+Libraries used:
+```
 import musdb
 import stempeg
 import ffmpeg
@@ -209,14 +146,6 @@ import librosa
 import librosa.display
 import IPython.display as ipd
 from pathlib import Path
-
-mus = musdb.DB(
-    root="/Users/ivanarasch/Desktop/GradSchool/MIR/SourceSeparationProject/musdb18",
-    subsets="train",  # or "test"
-    is_wav=False      
-)
-
-...
 
 # Data synthesis for experiment 1
 
@@ -241,98 +170,25 @@ sf.write("other_vocals.wav", other_vocals, track.rate)
   
 Once we had synthesized the new data, as outlined in the last block of code seen above, we were able to use it for source separation.
 
-While this approach of creating vocal interference mixtures is logical within our study, several modifications could make the modified data more challenging for the models. For example, adjusting the balance of dynamics between vocal and instrument to simulate real-world dynamics where vocals may be louder or softer relative to the accompaniment, mixing vocals with multiple stems simultaneously, and combining vocals with stems from different tracks. All of these could be potential avenues for exploring interference of different elements with vocals.
-
 #### Experiment 2: Impact of common audio effects on good separation of effected vocals from all non-vocal stems 
 
-The next area of exploration within our study was the models’ performance on stems processed with effects commonly used in audio contexts: reverb, delay, bitcrush and compression. These effects were applied at different intensities so as to allow us to determine the threshold at which the model fails to accurately identify and separate the processed stem without transferring its effect to other sources.
+The next exploration was the models’ performance on stems processed with common audio effects: reverb, delay, bitcrush, and compression, applied at different intensities to test when models fail to separate the processed stem without affecting others.
 
-This topic is clearly relevant to both the field of MIR as well as audio engineering research and has practical implications for producers, engineers and music appreciators in everyday settings. Further, current state-of-the-art models are known to struggle to accurately separate stems when instruments overlap or effects are applied, although effects are at the core of music and music production and engineering practices for decades. Thus, it was appropriate and on topic to study this thoroughly. 
+This is relevant to MIR and audio engineering, as current models struggle with overlapping instruments or applied effects.
 
-Using Python, we applied the aforementioned audio effects directly to the vocal stem of each track within the MUSDB18 dataset. Each effect was applied at 3 intensity levels to create progressively challenging conditions.
+Using Python, effects were applied to the vocal stem of each MUSDB18 track at 3 intensity levels. Reverb and delay varied in time and repeats, bitcrush in bit depth and downsampling, and compression in threshold and ratio. Each processed vocal replaced the original stem, keeping other stems unchanged, and resulting mixes were saved as .wav files.
 
-Reverb levels were defined by the delay time between reflections (delay_ms) and the number of repeats, ranging from 30 ms with 2 repeats to 120 ms with 5 repeats. Delay was similarly varied by delay time and repeats, from 120 ms with 1 repeat up to 400 ms with 4 repeats. Bitcrush levels were defined by decreasing bit depth and increasing downsample factors, introducing progressively stronger distortion. Compression was varied by threshold and ratio, with higher levels applying more aggressive dynamic range reduction.
+Future work could explore effects on other stems.
 
-The processing was applied exclusively to the vocal stem, to aid in simplicity of workflow and allow for manageable evaluation. For each effect and each intensity level for that effect, we generated a new audio file by replacing the original vocal stem of the track with its processed version although keeping the remaining stems unchanged. Each resulting mix was then written as a .wav file in a structured directory alongside the original stems. 
-
-In the future, it would be of interest to see how well the models would perform in source separation with different elements of each track being processed.
-See below code examples to see the process for the reverb effect:  
-
-```REVERB_LEVELS = [
-    {"delay_ms": 30, "repeats": 2},
-    {"delay_ms": 50, "repeats": 3},
-    {"delay_ms": 80, "repeats": 4},
-    {"delay_ms": 120, "repeats": 5},
-]
-
-def apply_effect(vocals_np, rate, effect_func, params):
-    vocal_audio = utils.audiosegment_from_numpy(vocals_np, rate)
-    fx_vocals = effect_func(vocal_audio, **params)
-    return utils.audiosegment_to_numpy(fx_vocals)
-mus = musdb.DB(root="musdb18", subsets="test")
-
-OUTPUT_ROOT = Path("musdb18synthesized")
-OUTPUT_ROOT.mkdir(exist_ok=True)
-
-for track in mus.tracks:
-    print(f"\n=== Processing {track.name} ===")
-
-    track_dir = OUTPUT_ROOT / track.name
-    (track_dir / "original").mkdir(parents=True, exist_ok=True)
-
-    rate = track.rate
-    mix = track.audio
-
-    vocals = track.targets["vocals"].audio
-    bass = track.targets["bass"].audio
-    drums = track.targets["drums"].audio
-    other = track.targets["other"].audio
-
-    # Save original stems + mix
-    sf.write(track_dir / "original" / "mix.wav", mix, rate)
-    sf.write(track_dir / "original" / "vocals.wav", vocals, rate)
-    sf.write(track_dir / "original" / "bass.wav", bass, rate)
-    sf.write(track_dir / "original" / "drums.wav", drums, rate)
-    sf.write(track_dir / "original" / "other.wav", other, rate)
-
-    # =============================
-    # Apply each effect
-    # =============================
-
-    # Reverb
-    for i, params in enumerate(REVERB_LEVELS, 1):
-        out = track_dir / f"reverb_l{i}"
-        out.mkdir(exist_ok=True)
-
-        fx_vocals = apply_effect(vocals, rate, utils.add_reverb, params)
-
-        fx_mix = mix.copy()
-        fx_mix[:len(vocals)] += fx_vocals - vocals
-        fx_mix = fx_mix.clip(-1, 1)
-
-        sf.write(out / "mix.wav", fx_mix, rate)
-```
-
-The method used here applies each effect and its levels in separate loops manually, which work for the task at hand, however this method is indeed repetitive, harder to maintain, and less flexible than others. To improve, the workflow could adopt modular effect chains or object-oriented effect classes, allowing multiple effects to be applied sequentially or in parallel in a reusable, maintainable way. Potential approaches could reduce code duplication, make it easier to experiment with different effect combinations, and bring the processing pipeline closer to modern, state-of-the-art audio engineering practices. This remains to be explored in future work.
+The method used each effect in separate loops manually, which works, but is repetitive, harder to maintain, and less flexible. Future work could explore modular effect chains or object-oriented classes to reduce duplication and improve flexibility.
 
 ## 7. Presentation of evaluation metrics
 
-To evaluate the performance of source separation models, standard metrics such as SAR, SDR, SIR and ISR are used.
+To evaluate source separation models, standard metrics such as SAR, SDR, SIR, and ISR are used. SDR measures overall quality, SIR quantifies unwanted leakage, SAR evaluates artifacts, and ISR assesses stereo/spatial accuracy.
 
-SDR (Signal-to-Distortion Ratio) measures the overall quality of the separated source, capturing how close it is to the original. 
-SIR (Signal-to-Interference Ratio) quantifies how much unwanted leakage from other sources remains in the separation. 
-SAR (Signal-to-Artifact Ratio) evaluates artifacts or unnatural sounds introduced during separation. 
-ISR (Image-to-Spatial Distortion Ratio) assesses the accuracy of stereo or spatial placement in the separated audio. 
+These metrics have limitations: high scores may not reflect human perception, and they rely on ground truth stems, which are often unavailable. WASPAA proposed embedding-based metrics for perceptual evaluation without ground truth, but these remain largely inaccessible. Museval, previously standard, is deprecated.
 
-These have limitations as they may produce high scoring results but nonetheless do not reflect human perception and evaluation of sources separated with algorithms. That’s to say that although a vocal track could be separated with the help of a model and obtain a very high SDR score, a human could listen and find it very unpleasant, unnatural and unusual sounding for a solo vocal recording. 
-
-Additionally, the outlined metrics are limited by their reliance on ground truth stems to compare them to sample-by-sample. This inherently highlights dataset-related challenge, seeing as tto both perform source separation with machine-learning models and then evaluate the quality of the separation using the above metrics, we need the divided stems, as well as the full mix, which are widely unavailable, while full mixes are extremely sourceable. 
-
-WASPAA has innovated metrics for source separation purposes that aim to better correlate to human perception. Some metrics, like embedding-based ones, were trained on generative outputs, so they may be more sensitive to subtle artifacts than SDR but might not correlate perfectly with human perception on discriminative outputs. Additionally, these evaluation processes can evaluate without using ground truth stems, aiding in making source separation increasingly accessible. However ironically, these metrics and evaluation processes remain inaccessible themselves, the reason for which they were not implemented in this study.
-
-On the contrary, Museval is the standard for evaluation of discriminately separated sources. It is appreciated for its easy to use qualities: can pass the track objects of the separated sources to museval, and museval will output a dictionary of SAR, SDR, SIR and ISR. However, Museval has been deprecated. 
-
-Finally, we opted to use SI-SDR and SI-SAR as evaluation metrics. They represent an improvement upon the standard metrics outlined above while maintaining simplicity of application, contrarily to those introduced by WASPAA. They possess sensitivity to distortion and artifacts, and although these metrics still rely on ground truth stems, they allow us to objectively assess model performance on the MUSDB18 dataset and provide a consistent baseline for comparing different separation models on the challenging conditions.
+We used SI-SDR and SI-SAR, which improve on standard metrics, remain simple to apply, and allow objective assessment on MUSDB18 under challenging conditions.
 
 ## 8. Analysis and discussion
 
@@ -447,11 +303,11 @@ More specifically, Spleeter shows stronger performance when dynamics are distort
 
 ## 9. Conclusion
 
-In conclusion, the first experiment determined that non-vocal elements with similar harmonic content to vocals cause the most interference and cause the models to perform poorly, while harrmonically disparate elements such as drums and bass allow for better vocal separation performaance of models. The second experiment demonstrated that both models struggle with separation of highly processed vocal inputs, most specifically after applying effects which impact the harmonic structure and temporal cues such as reverb and delay, while effects such as compression and bitcrushing which distort dynamics result in better separated outputs. One challenge to retain from the second experiment is that the model struggled in keeping the effects only tied to the vocal stems, occasionally erroniously separating the effects with non-vocal elements. This is an audible observation that leaves us with the opportunity to further explore how these models can better distinguish assign applied effects to the correct sources, ensuring that reverberation, delay, or other processing remains confined to the intended stem without leaking into other separated tracks.
+In conclusion, the first experiment showed that non-vocal elements with similar harmonic content to vocals cause the most interference, while drums and bass allow better separation. The second experiment showed both models struggle with highly processed vocals, especially with reverb and delay, while compression and bitcrushing result in better separation. Models also occasionally misassign effects to non-vocal elements.
 
-Future work could explore training or fine-tuning the models on datasets that include stems with commonly applied effects, allowing them to learn to separate both source content and processing more accurately. Next, expanding the dataset to include a wider variety of instruments and more complex arrangements could allow for further evaluation of models' handling harmonically dense or overlapping sources. Additionally, incorporating multi-channel or spatial cues, as well as more advanced waveform modeling techniques, may further improve separation quality, particularly in complex mixtures with overlapping harmonic and temporal content.
+Future work could include training on stems with effects, expanding datasets with more instruments and complex arrangements, and using multi-channel or advanced waveform modeling to improve separation.
 
-Finally, from our above findings, it is impossible to draw a definitive conclusion on which model performs better overall under challenging conditions, confronting the idea that Demucs is a superior model. 
+Overall, it is impossible to definitively say which model performs better under challenging conditions.
 
 ## 10. Bibliography
 
