@@ -333,41 +333,68 @@ WASPAA has innovated metrics for source separation purposes that aim to better c
 On the contrary, Museval is the standard for evaluation of discriminately separated sources. It is appreciated for its easy to use qualities: can pass the track objects of the separated sources to museval, and museval will output a dictionary of SAR, SDR, SIR and ISR. However, Museval has been deprecated. 
 
 Finally, we opted to use SI-SDR and SI-SAR as evaluation metrics. They represent an improvement upon the standard metrics outlined above while maintaining simplicity of application, contrarily to those introduced by WASPAA. They possess sensitivity to distortion and artifacts, and although these metrics still rely on ground truth stems, they allow us to objectively assess model performance on the MUSDB18 dataset and provide a consistent baseline for comparing different separation models on the challenging conditions.
- 
-See below how we implemented the evaluation process through code and with the help of of evluation library for both of our experiments:
-
-ADD CODE SNAPSHOT
-
 
 ## 8. Analysis and discussion
 
 #### Experiment 1 scores and evaluation
 
-Using the stems provided in the MUSDB18 dataset, we evaluated the performance of Spleeter and Demucs with the help of both SDR, SIR, SAR, ISR and SI-SDR, SI-SAR-like, RMSE metrics. These  stems served as their own control data upon whcih to evaluate performance, allowing us to assess how different non-vocal elements interfere with vocal separation.
+Using the separated stems in the MUSDB18 dataset, we evaluated the performance of Spleeter and Demucs with the help of SI-SDR, SI-SAR-like, and RMSE metrics. These  stems served as their own control data upon whcih to evaluate performance, allowing us to assess how different non-vocal elements interfere with vocal separation.
 
-Across both models, instruments that overlap heavily in frequency or harmonic content with the vocal stem caused the most interference when loooking at separated vocals. Both Spleeter and Demucs performed well, resulting in high separation scores for both metrics, on bass and drums. These instrument categories can be noted as not having much harmonic overlap with the spectrum of a vocal. The “other” and "accompaniment" categories, generally guitar and piano recordings respectively, resulted in the lowest scores accross metrics, indicating more interference. 
+Across both models, instruments that overlap heavily in frequency or harmonic content with the vocal stem caused the most interference when loooking at separated vocals. Both Spleeter and Demucs performed well, resulting in high separation scores for both metrics, on bass and drums. These instrument categories can be noted as not having much harmonic overlap with the spectrum of a vocal. The “other” and "accompaniment" categories, generally guitar and piano recordings respectively, resulted in the lowest performance scores, indicating more interference. 
 
-The trend demonstrated by both models was that densely textured or harmonically rich stems (e.g. guitar and piano recordings) highly affected vocal separation performance, whereas percussive or tonally distinct instruments (drums, bass) had a smaller impact. However, #### Model 1 performed better on more complex accompaniments, while Model 2 maintained higher fidelity and lower waveform error across most instrument pairings.
+The trend demonstrated by both models was that densely textured or harmonically rich stems (e.g. guitar and piano recordings) highly affected vocal separation performance, whereas percussive or tonally distinct instruments (drums, bass) had a smaller impact. However, #### Demucs outperformed #### Spleeter on every stem pairing, achieving higher SI-SDR and SI-SAR-like values and lower RMSE than Spleeter for all vocal and non-vocal mixtures. 
 
-For each instrument, the following scores were found across both metrics:
-
-Accompaniment: 
-- SDR = 12.70, SIR = –2.18, SAR = 0.216, ISR = –5.81
-- SI-SDR = 14.31, SI-SAR-like = 14.47, RMSE = 0.00968
+For each instrument, the following scores were found:
 
 Bass: 
-- SDR = 14.68, SIR = 18.51, SAR = 0.0554, ISR = –19.95
-- SI-SDR = 16.07, SI-SAR-like = 16.18, RMSE = 0.00763
+
+Spleeter
+- SI-SDR = 15.04
+- SI-SAR-like = 15.18
+- RMSE = 0.00868
+
+Demucs
+- SI-SDR = 20.94
+- SI-SAR-like = 20.98
+- RMSE = 0.00459
 
 Drums: 
-- SDR = 14.57, SIR = 22.42, SAR = 0.0926, ISR = –16.13
-- SI-SDR = 14.38, SI-SAR-like = 14.53, RMSE = 0.00861
+
+Spleeter
+- SI-SDR = 11.78
+- SI-SAR-like = 12.05
+- RMSE = 0.01154
+
+Demucs
+- SI-SDR = 15.57
+- SI-SAR-like = 15.69
+- RMSE = 0.00762
 
 Other: 
-- SDR = 7.11, SIR = 18.13, SAR = 0.0444, ISR = –18.79 
-- SI-SDR = 11.36, SI-SAR-like = 11.67, RMSE = 0.01248
 
-These findings support our claim that both moddels perform well when separating vocals from dums and bass, and both perform poorly in spearting vocals from accompaniment and other.
+Spleeter
+- SI-SDR = 7.86
+- SI-SAR-like = 8.52
+- RMSE = 0.01804
+
+Demucs
+- SI-SDR = 9.84
+- SI-SAR-like = 10.27
+- RMSE = 0.01384
+
+Accompaniment: 
+
+Spleeter
+- SI-SDR = 6.50
+- SI-SAR-like = 7.38
+- RMSE = 0.02124
+
+Demucs
+- SI-SDR = 8.75
+- SI-SAR-like = 9.29
+- RMSE = 0.01576
+
+These findings support our claim that both models perform well when separating vocals from dums and bass, with Demucs outperforming Spleeter, and that both perform poorly in spearting vocals from accompaniment and other.
 
 #### Experiment 2 scores and evaluation
 
