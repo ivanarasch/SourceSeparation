@@ -97,25 +97,34 @@ And so on for each track. Total of 650 songs
 
 ## 5. Models
 
-For this study, we compared source separtion performances using the two models previously outlined: Spleeter and Demucs.
+For this study, we compared source separation performances using Spleeter and Demucs.
 
 #### Spleeter:
 
-https://github.com/deezer/spleeter
+Spleeter is an open-source music source separation library developed by Deezer in 2019. It separates audio into vocals, drums, bass, and accompaniment using a U-Net-based neural network. Pre-trained models include 2-, 4-, and 5-stem separations. It runs on GPU, with results comparable to Demucs. For Experiment 1, we used the 2-stem model.
 
-- Open-source, U-Net-based CNN
-- Pre-trained for 2, 4, 5 stems
-- Fast, adaptable
-- Struggles on complex inputs
+Pros:
+- Fast processing of audio files
+- Adaptable to multiple uses
 
-#### Demucs
+Cons:
+- Diminished performance on complex inputs
+- Lacks flexibility, does not retrain itself, likely struggling with vocals from elements with similar harmonic content (guitar) and processed inputs in Experiment 2
 
-https://github.com/facebookresearch/demucs
+#### Demucs:
 
-- Wave-U-Net, time-domain separation
-- High-quality outputs, fewer artifacts
-- Flexible, handles complex input
-- Computationally costly
+Demucs is an open-source music source separation model developed by Facebook AI Research in 2019. It operates directly on the raw audio waveform using a Wave-U-Net architecture, learning temporal and spectral features more intelligently. It separates audio into multiple stems, including vocals, drums, bass, and other accompaniment, and can run on a GPU.
+
+Pros:
+- High-quality output with fewer artifacts than spectrogram-based methods
+- Handles complex input and overlapping harmonic structures
+- Flexible architecture allows fine-tuning for different instruments or genres
+
+Cons:
+- Computationally inefficient and costly
+- Implementation not user friendly
+
+These remarks suggest Demucs may perform well in separating vocals from elements with similar harmonic content in Experiment 1 and with processed synthesized inputs in Experiment 2.
 
 ## 6. Experiments and preprocessing
 Though referred to as experiments, carrying out the experiment itself is fairly simple: feed the preprocessed audio into Spleeter or Demucs, run the separation, and collect the outputs. The bulk of our work was done through the data synthesis. We synthesized the 50 test tracks included in MUSDB18.
