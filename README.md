@@ -64,6 +64,7 @@ We chose the following pipeline for our project for each experiment:
 ## 4. Dataset and architecture
 
 We used MUSDB18: 150 tracks (100 train, 50 test), stereo, 44.1 kHz, 256 kbps. Stems: vocals, bass, drums, accompaniment, other.
+
 #### Experiment 1: Impact of instrumental interference on isolation of vocal tracks when processed using Spleeter and Demucs
 
 - musdb18SynthesizedExperiment1/
