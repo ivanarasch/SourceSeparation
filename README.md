@@ -129,6 +129,8 @@ These remarks suggest Demucs may perform well in separating vocals from elements
 ## 6. Experiments and preprocessing
 Though referred to as experiments, carrying out the experiment itself is fairly simple: feed the preprocessed audio into Spleeter or Demucs, run the separation, and collect the outputs. The bulk of our work was done through the data synthesis. We synthesized the 50 test tracks included in MUSDB18.
 
+We made use of the ffmpeg library as a tool for audio processing, it allowed for the synthesis of data for the purpose of our experiments. It allowed for the application of effects (experiment 2) as well as the compilation of different stems together (Experiments 1 and 2). It was efficient in the preparation of our large datasets and allowed for them to be ready to use with the models.
+
 Experiment 1: Impact of instrumental interference on isolation of vocal tracks when processed using Spleeter and Demucs
 
 As previously mentioned, through our study, we wished to understand the impact that different instruments and accompaniments can have on the separation of vocals. For each track of the dataset, we generated new audio by pairing the vocal stem with each instrument stem, allowing us to evaluate how well the models could separate them.
