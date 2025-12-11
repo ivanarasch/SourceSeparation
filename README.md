@@ -140,9 +140,8 @@ To create this new data, we combined the isolated vocal stem with each individua
 We iterated over each track to extract the original stems and then created new synthetic mixtures by adding vocals to a single stem. We then wrote each mixture as a WAV file in a structured directory alongside the original stems.
 
 See examples below:
-
-Libraries used:
 ```
+# Libraries used:
 import musdb
 import stempeg
 import ffmpeg
@@ -189,7 +188,7 @@ Using Python, effects were applied to the vocal stem of each MUSDB18 track at 3 
 
 Future work could explore effects on other stems.
 
-The method used each effect in separate loops manually, which works, but is repetitive, harder to maintain, and less flexible. Future work could explore modular effect chains or object-oriented classes to reduce duplication and improve flexibility.
+The method used each effect in separate loops manually, which works, but is repetitive, harder to maintain, and less flexible. Future work could explore modular effect chains or object-oriented classes to reduce duplication and improve flexibility. Refer to DataSynthesis.ipynb for all code used in this process.
 
 ## 7. Presentation of evaluation metrics
 
@@ -197,7 +196,7 @@ To evaluate source separation models, standard metrics such as SAR, SDR, SIR, an
 
 These metrics have limitations: high scores may not reflect human perception, and they rely on ground truth stems, which are often unavailable. WASPAA proposed embedding-based metrics for perceptual evaluation without ground truth, but these remain largely inaccessible. Museval, previously standard, is deprecated.
 
-We used SI-SDR and SI-SAR, which improve on standard metrics, remain simple to apply, and allow objective assessment on MUSDB18 under challenging conditions.
+We used SI-SDR and SI-SAR as evaluation metrics. They improve on standard metrics, remain simple to apply, and allow us to objectively assess model performance on the MUSDB18 dataset under challenging conditions.
 
 ## 8. Analysis and discussion
 
@@ -312,11 +311,13 @@ More specifically, Spleeter shows stronger performance when dynamics are distort
 
 ## 9. Conclusion
 
-In conclusion, the first experiment showed that non-vocal elements with similar harmonic content to vocals cause the most interference, while drums and bass allow better separation. The second experiment showed both models struggle with highly processed vocals, especially with reverb and delay, while compression and bitcrushing result in better separation. Models also occasionally misassign effects to non-vocal elements.
+In conclusion, the first experiment showed that non-vocal elements with similar harmonic content to vocals cause the most interference, while drums and bass allow better separation. The second experiment showed both models struggle with highly processed vocals, especially with reverb and delay, while compression and bitcrushing result in better separation. Models also occasionally misassign effects to non-vocal elements. 
 
 Future work could include training on stems with effects, expanding datasets with more instruments and complex arrangements, and using multi-channel or advanced waveform modeling to improve separation.
 
-Overall, it is impossible to definitively say which model performs better under challenging conditions.
+One challenge to retain from the second experiment is that the model struggled in keeping the effects only tied to the vocal stems, occasionally erroniously separating the effects with non-vocal elements. This is an audible observation that leaves us with the opportunity to further explore how these models can better distinguish assign applied effects to the correct sources, ensuring that reverberation, delay, or other processing remains confined to the intended stem without leaking into other separated tracks.
+
+Overall, it is impossible to definitively say which model performs better under challenging conditions, however Demucs showed marginal superiority.
 
 ## 10. Bibliography
 
